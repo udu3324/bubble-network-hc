@@ -1,2 +1,14 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script>
+    import Bar from "./bar.svelte";
+    import Panel from "./panel.svelte";
+    import Viewer from "./viewer.svelte";
+
+</script>
+
+<div class="bg-slate-950 w-screen h-screen p-3 flex">
+    <Panel/>
+    <div class="flex flex-col grow">
+        <Viewer/>
+        <Bar/>
+    </div>
+</div>
