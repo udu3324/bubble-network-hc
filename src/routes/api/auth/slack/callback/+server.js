@@ -2,6 +2,25 @@ import { json } from "@sveltejs/kit";
 
 export async function GET({ url }) {
     const code = url.searchParams.get("code")
+    const error = url.searchParams.get("error")
+
+    //slack has redirected with an error param in the url
+
+    if (error) {
+        if (error == "access_denied") {
+            return new Response(JSON.stringify({
+                error: "you pressed cancel! if you are concerned about privacy, read more here below",
+                details: `${process.env.NEXT_PUBLIC_BASE_URL}/privacy`
+            }), { status: 400 })
+        } else {
+            return new Response(JSON.stringify({
+                error: "something bad happened... please report this to someone!",
+                details: error
+            }), { status: 400 })
+        }
+    }
+
+    //slack api has now given a code that can be exchanged for an api token
 
     const redirectURI = "https://bubble-network-hc.vercel.app/api/auth/slack/callback"
 
@@ -22,7 +41,7 @@ export async function GET({ url }) {
 
     if (!data.ok) {
         return new Response(JSON.stringify({
-            error: "slack oauth has failed, more details below",
+            error: "something bad has happened... slack oauth has failed, please report this to someone!",
             details: data.error
         }), { status: 400 })
     }
