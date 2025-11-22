@@ -1,6 +1,6 @@
 <script>
 	import '../app.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/bubble-network-hc icon 256.png';
 	
 	let { children } = $props();
 </script>

@@ -1,4 +1,23 @@
 <script>
+    const clientID = "2210535565.9770937874130" //todo move to .env
+    const redirect = encodeURIComponent("https://bubble-network-hc.vercel.app/api/auth/slack/callback")
+
+    const userScopes = [
+      "channels:history",
+      "channels:read",
+      "groups:read",
+      "im:read",
+      "mpim:read",
+      "users.profile:read",
+      "users:read"
+    ].join(",");
+
+    const slackAuthURL = 
+        `https://slack.com/oauth/v2/authorize` +
+        `?client_id=${clientID}` +
+        `&scope=` +
+        `&user_scope=${userScopes}` +
+        `&redirect_uri=${redirect}`
     
 </script>
 
@@ -6,7 +25,10 @@
     slack oauth login here + control panel stuff
 
     <br><br>
-    <button>slack oauth</button>
+    <a href={slackAuthURL}>
+        <button>slack oauth</button>
+    </a>
+    
 </div>
 
 <style lang="postcss">
