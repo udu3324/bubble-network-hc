@@ -25,7 +25,7 @@
     slack oauth login here + control panel stuff
 
     <br><br>
-    <a href={slackAuthURL}>
+    <a href={slackAuthURL} target="_blank">
         <button>slack oauth</button>
     </a>
     

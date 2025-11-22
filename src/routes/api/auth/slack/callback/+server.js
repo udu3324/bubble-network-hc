@@ -20,10 +20,15 @@ export async function GET({ url }) {
 
     const data = await res.json()
 
-    if (!data.ok)
-        return new Response("oauth failed", { status: 400 })
+    if (!data.ok) {
+        return new Response(JSON.stringify({
+            error: "slack oauth has failed, more details below",
+            details: data.error
+        }), { status: 400 })
+    }
+        
 
     const userInfo = data.authed_user
 
-    return new Response("you can go back", { status: 200 })
+    return new Response("you can close this window and go back", { status: 200 })
 }
