@@ -6,6 +6,7 @@
 </script>
 
 <svelte:head>
+	<title>bubble net</title>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
