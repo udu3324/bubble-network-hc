@@ -1,4 +1,3 @@
-import { supabase } from "$lib/server/supabaseServiceClient";
 import { json } from "@sveltejs/kit";
 
 export async function GET({ url }) {
@@ -52,21 +51,27 @@ export async function GET({ url }) {
     
     const userInfo = data.authed_user
 
-    const sessionID = crypto.randomUUID()
+    return new Response(`
+        <!DOCTYPE html>
+        <head>
+            <title>sucess</title>
+        </head>
+        <body>
+            <span>slack oauth sucessfull. window is closing automatically in a second.</span>
 
-    await supabase.from("slack_sessions").insert({
-        session_id: sessionID,
-        slack_user_id: userInfo.id,
-        access_token: userInfo.access_token
-    })
+            <script>
+                localStorage.setItem('user_id', '${userInfo.id}')
+                localStorage.setItem('token', '${userInfo.access_token}')
 
-    const cookie = serialize("linkin.auth", token, {
-        path: "/",
-        sameSite: "lax",
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-    });
+                setTimeout(() => {
+                    window.close()
+                }, 1000);
 
-    return new Response("you can close this window and go back", { status: 200 })
+            </script>
+        </body>
+        </html>
+        `, {
+            headers: { "Content-Type": "text/html" },
+            status: 200
+        })
 }
