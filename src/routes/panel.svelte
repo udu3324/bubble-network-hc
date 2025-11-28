@@ -5,7 +5,9 @@
 </script>
 
 <div class="bg-slate-700 mr-3 p-3 w-72 rounded-lg text-white">
-    slack oauth login here + control panel stuff
+    <div class="pb-5">
+        <span class="text-3xl">Bubble Network</span>
+    </div>
 
     <OAuthButton/>
     
