@@ -2,7 +2,7 @@
 
     import { onDestroy, onMount } from 'svelte';
 
-    import { PUBLIC_BASE_URL } from '$env/static/public'
+    import { PUBLIC_BASE_URL, PUBLIC_SLACK_APP_CLIENT_ID } from '$env/static/public'
    
 
     let statusText = ""
@@ -10,7 +10,6 @@
 
     let intervalCheck
 
-    const clientID = "2210535565.9770937874130" //todo move to .env
     const redirect = encodeURIComponent(`${PUBLIC_BASE_URL}/api/auth/slack/callback`)
 
     const userScopes = [
@@ -25,7 +24,7 @@
 
     const slackAuthURL = 
         `https://slack.com/oauth/v2/authorize` +
-        `?client_id=${clientID}` +
+        `?client_id=${PUBLIC_SLACK_APP_CLIENT_ID}` +
         `&scope=` +
         `&user_scope=${userScopes}` +
         `&redirect_uri=${redirect}`
