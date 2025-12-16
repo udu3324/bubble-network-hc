@@ -56,7 +56,7 @@ export async function GET({ url }) {
     const web = new WebClient(userInfo.access_token) 
     const profile = await web.users.profile.get()
     
-    const { error } = await supabase
+    const { error2 } = await supabase
         .from('cache')
         .upsert({
             slack_id: userInfo.id,
@@ -66,7 +66,7 @@ export async function GET({ url }) {
             onConflict: 'slack_id'
         })
     
-    if (error) {
+    if (error2) {
         return new Response(JSON.stringify({
                 error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
                 details: error
