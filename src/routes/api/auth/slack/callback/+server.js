@@ -54,26 +54,26 @@ export async function GET({ url }) {
     const userInfo = data.authed_user
 
     const web = new WebClient(userInfo.access_token) 
-    const profile = await web.users.profile.get({
+    const profileRes = await web.users.profile.get({
         user: userInfo.id
     })
     
-    if (!profile.ok) {
+    if (!profileRes.ok) {
         return new Response(JSON.stringify({
                 error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
                 details: error
             }), { status: 400 })
     }
 
-    const { profileData } = profile
+    const { profile } = profileRes
 
     const { error } = await supabase
         .from('cache')
         .upsert({
             modified_at: new Date().toISOString(),
             slack_id: userInfo.id,
-            username: profileData.display_name,
-            profile_picture: profileData.image_192
+            username: profile.display_name,
+            profile_picture: profile.image_192
         }, {
             onConflict: 'slack_id'
         })
