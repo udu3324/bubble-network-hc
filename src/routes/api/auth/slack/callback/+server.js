@@ -67,7 +67,7 @@ export async function GET({ url }) {
 
     const { profile } = profileRes
 
-    let username = (profile.display_name === 0) ? profile.real_name : profile.display_name
+    let username = (profile.display_name.length === 0) ? profile.real_name : profile.display_name
 
     const { error } = await supabase
         .from('cache')
