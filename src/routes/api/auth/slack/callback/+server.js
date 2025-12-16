@@ -67,12 +67,14 @@ export async function GET({ url }) {
 
     const { profile } = profileRes
 
+    let username = (profile.display_name === 0) ? profile.real_name : profile.display_name
+
     const { error } = await supabase
         .from('cache')
         .upsert({
             modified_at: new Date().toISOString(),
             slack_id: userInfo.id,
-            username: profile.display_name,
+            username: username,
             profile_picture: profile.image_192
         }, {
             onConflict: 'slack_id'
