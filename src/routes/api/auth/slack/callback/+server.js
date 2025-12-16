@@ -5,12 +5,12 @@ import { json } from "@sveltejs/kit";
 export async function GET({ url }) {
 
     const code = url.searchParams.get("code")
-    const error = url.searchParams.get("error")
+    const error1 = url.searchParams.get("error")
 
     //slack has redirected with an error param in the url
 
-    if (error) {
-        if (error == "access_denied") {
+    if (error1) {
+        if (error1 == "access_denied") {
             return new Response(JSON.stringify({
                 error: "you pressed cancel! if you are concerned about privacy, read this",
                 details: `${process.env.PUBLIC_BASE_URL}/privacy`
@@ -18,7 +18,7 @@ export async function GET({ url }) {
         } else {
             return new Response(JSON.stringify({
                 error: "something bad happened... please report this to someone!",
-                details: error
+                details: error1
             }), { status: 400 })
         }
     }
@@ -56,9 +56,10 @@ export async function GET({ url }) {
     const web = new WebClient(userInfo.access_token) 
     const profile = await web.users.profile.get()
     
-    const { error2 } = await supabase
+    const { error } = await supabase
         .from('cache')
         .upsert({
+            modified_at: new Date().toISOString(),
             slack_id: userInfo.id,
             username: profile.display_name,
             profile_picture: profile.image_192
@@ -66,7 +67,7 @@ export async function GET({ url }) {
             onConflict: 'slack_id'
         })
     
-    if (error2) {
+    if (error) {
         return new Response(JSON.stringify({
                 error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
                 details: error
