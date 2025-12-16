@@ -54,8 +54,17 @@ export async function GET({ url }) {
     const userInfo = data.authed_user
 
     const web = new WebClient(userInfo.access_token) 
-    const profile = await web.users.profile.get()
+    const profile = await web.users.profile.get({
+        user: userInfo.id
+    })
     
+    if (!profile.ok) {
+        return new Response(JSON.stringify({
+                error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
+                details: error
+            }), { status: 400 })
+    }
+
     const { error } = await supabase
         .from('cache')
         .upsert({
@@ -66,10 +75,10 @@ export async function GET({ url }) {
         }, {
             onConflict: 'slack_id'
         })
-    
+
     if (error) {
         return new Response(JSON.stringify({
-                error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
+                error: "something bad happened... cache storage failed with an error, please report this to someone!",
                 details: error
             }), { status: 400 })
     }
