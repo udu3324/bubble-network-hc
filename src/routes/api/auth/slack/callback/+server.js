@@ -71,7 +71,6 @@ export async function GET({ url }) {
                 error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
                 details: error
             }), { status: 400 })
-        }
     }
 
     // save user info for slack api
