@@ -65,13 +65,15 @@ export async function GET({ url }) {
             }), { status: 400 })
     }
 
+    const { profileData } = profile
+
     const { error } = await supabase
         .from('cache')
         .upsert({
             modified_at: new Date().toISOString(),
             slack_id: userInfo.id,
-            username: profile.display_name,
-            profile_picture: profile.image_192
+            username: profileData.display_name,
+            profile_picture: profileData.image_192
         }, {
             onConflict: 'slack_id'
         })
