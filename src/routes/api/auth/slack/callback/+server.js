@@ -1,3 +1,5 @@
+import { supabase } from "$lib/supabaseClient";
+import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
 
 export async function GET({ url }) {
@@ -47,9 +49,32 @@ export async function GET({ url }) {
         }), { status: 400 })
     }
 
-    // save user info for slack api
+    // save user id, display name, and pfp url to supabase
     
     const userInfo = data.authed_user
+
+    const web = new WebClient(userInfo.access_token) 
+    const profile = await web.users.profile.get()
+    
+    const { error } = await supabase
+        .from('cache')
+        .upsert({
+            slack_id: userInfo.id,
+            username: profile.display_name,
+            profile_picture: profile.image_192
+        }, {
+            onConflict: 'slack_id'
+        })
+    
+    if (error) {
+        return new Response(JSON.stringify({
+                error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
+                details: error
+            }), { status: 400 })
+        }
+    }
+
+    // save user info for slack api
 
     return new Response(`
         <!DOCTYPE html>

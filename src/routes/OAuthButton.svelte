@@ -1,5 +1,7 @@
 <script>
 
+    import { isAuthed } from "$lib";
+
     import { onDestroy, onMount } from 'svelte';
 
     import { PUBLIC_BASE_URL, PUBLIC_SLACK_APP_CLIENT_ID } from '$env/static/public'
@@ -45,9 +47,13 @@
 
         if (id) {
             buttonDisabled = true
+            isAuthed.set(true)
+
             statusText = "Authenticated"
         } else {
             buttonDisabled = false
+            isAuthed.set(false)
+
             statusText = "Not authenticated"
         }
     }
