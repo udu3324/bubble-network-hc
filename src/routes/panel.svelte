@@ -4,6 +4,10 @@
 
     import OAuthButton from "./OAuthButton.svelte";
     
+    
+    function send() {
+        fetch(`/api/auth/slack/scan/public?id=${id}&key=${key}`)
+    }
 </script>
 
 <div class="bg-slate-700 mr-3 p-3 w-72 rounded-lg text-white">
@@ -15,7 +19,7 @@
     
     {#if $isAuthed}
     <div class="w-full bg-slate-800 rounded-lg p-3">
-        <button>Start Scan</button>
+        <button on:click={send}>Start Scan</button>
         <button>Clear Data</button>
     </div>
     {/if}
