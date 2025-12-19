@@ -8,8 +8,8 @@
         fetch('/api/auth/slack/scan/public', {
             method: "GET",
             headers: {
-                "authorization": `Bearer ${JSON.parse(localStorage.getItem("token"))}`,
-                "slack_id": JSON.parse(localStorage.getItem("user_id"))
+                "authorization": `Bearer ${localStorage.getItem("token").replaceAll("\"", "")}`,
+                "slack_id": localStorage.getItem("user_id").replaceAll("\"", "")
             }
         })
     }
