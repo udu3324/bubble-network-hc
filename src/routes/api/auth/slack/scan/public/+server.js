@@ -1,10 +1,14 @@
 import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
+import pLimit from "p-limit";
+const limit = pLimit(5)
 
-export async function GET({ url }) {
+export async function GET({ request }) {
+    
+    const auth_header = request.headers.get("Authorization")
+    const key = auth_header?.replace("Bearer ", "").trim()
 
-    const key = url.searchParams.get("key")
-    const id = url.searchParams.get("id")
+    const id = request.headers.get("slack_id")
 
     if (!key) {
         return new Response(JSON.stringify({
@@ -18,6 +22,7 @@ export async function GET({ url }) {
             }), { status: 401 })
     }
 
+    //get all the public channels that the user is in
     const web = new WebClient(key)
     const response = await web.users.conversations({
         user: id
@@ -29,28 +34,46 @@ export async function GET({ url }) {
                 details: response
             }), { status: 400 })
     }
+
+    //console.log("size is", response.channels.length)
+    //let count = 0
+
+    // for each channel, pull its history
+    let history
+    try {
+        history = await Promise.all(
+            response.channels.map(channel => 
+                limit(async () => {
+                    //count++
+                    //console.log(`doing channel ${count} ${channel.id}`)
+                    
+                    const res2 = await web.conversations.history({
+                        channel: channel.id,
+                        limit: 1000
+                    })
+
+                    if (!res2.ok) {
+                        throw new Error(`failed fetching history of channel ${channel.id}, details: ${res2}`)
+                    }
+
+                    return res2.messages
+                })
+            )
+        )
+    } catch (err) {
+        return new Response(JSON.stringify({
+            error: "something bad happened... slack api conversations.history failed with an error, please report this to someone!",
+            details: err.message
+        }), { status: 400 })
+    }
     
-    let user_ids = []
+    let user_ids = new Set()
 
-    // for each channel
-    for (const channel of response.channels) {
+    //console.log("finished")
 
-        // for its history (i would do pagination but like im done)
-        const res2 = await web.conversations.history({
-            channel: channel.id,
-            limit: 1000
-        })
-
-        if (!res2.ok) {
-            return new Response(JSON.stringify({
-                    error: "something bad happened... slack api conversations.history failed with an error, please report this to someone!",
-                    details: response
-                }), { status: 400 })
-        }
-
-        // for each message in its history
-        for (const message of res2.messages) {
-
+    //for all histories scanned of messages in all public channels
+    for (const hist of history) {
+        for (const message of hist) {
             //is it a thread
             if (!message.thread_ts) {
                 continue
@@ -66,20 +89,15 @@ export async function GET({ url }) {
 
             //does the author or replies contain the user id
             if ((author_id === id) || reply_users.includes(id)) {
-                user_ids.push(author_id, ...reply_users)
+                user_ids.add(author_id)
+                reply_users.forEach(uid => user_ids.add(uid))
             }
         }
     }
 
-    // filter out duplicates
-    user_ids = [...new Set(user_ids)]
+    //console.log(user_ids)
 
-    // filter out requesting user
-    user_ids.splice(user_ids.indexOf(id), 1)
-
-    console.log(user_ids)
-
-    return new Response(JSON.stringify({
-                ids: user_ids
-            }), { status: 200 })
+    return json({
+        ids: [...user_ids]
+    })
 }

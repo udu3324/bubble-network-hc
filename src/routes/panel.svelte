@@ -5,7 +5,13 @@
     import OAuthButton from "./OAuthButton.svelte";
     
     function send() {
-        fetch(`/api/auth/slack/scan/public?id=${id}&key=${key}`)
+        fetch('/api/auth/slack/scan/public', {
+            method: "GET",
+            headers: {
+                "authorization": `Bearer ${JSON.parse(localStorage.getItem("token"))}`,
+                "slack_id": JSON.parse(localStorage.getItem("user_id"))
+            }
+        })
     }
 </script>
 
