@@ -1,3 +1,4 @@
+import { supabase } from "$lib/server/supabaseServiceClient";
 import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
 import pLimit from "p-limit";
@@ -94,6 +95,26 @@ export async function GET({ request }) {
             }
         }
     }
+
+    //store in db
+    const { error } = await supabase
+        .from('network')
+        .upsert({
+            modified_at: new Date().toISOString(),
+            slack_id: id,
+            id_list: [...user_ids]
+        }, {
+            onConflict: 'slack_id'
+        })
+
+    if (error) {
+        return new Response(JSON.stringify({
+                error: "something bad happened... network storage failed with an error, please report this to someone!",
+                details: error
+            }), { status: 400 })
+    }
+
+    //todo cache of their ids
 
     //console.log(user_ids)
 
