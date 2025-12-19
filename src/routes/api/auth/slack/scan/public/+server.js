@@ -30,14 +30,10 @@ export async function GET({ url }) {
             }), { status: 400 })
     }
     
-    // for each channel
-    let channel_ids = []
-    for (const channel of response.channels) {
-        channel_ids.push(channel.id)
+    let user_ids = []
 
-        if (channel.id !== "C0A40D4F5HU") {
-            continue
-        }
+    // for each channel
+    for (const channel of response.channels) {
 
         // for its history (i would do pagination but like im done)
         const res2 = await web.conversations.history({
@@ -52,7 +48,7 @@ export async function GET({ url }) {
                 }), { status: 400 })
         }
 
-        // for each message in history
+        // for each message in its history
         for (const message of res2.messages) {
 
             //is it a thread
@@ -60,24 +56,30 @@ export async function GET({ url }) {
                 continue
             }
 
-            //does the author or replies contain the user id
             const author_id = message.user
             const reply_users = message.reply_users
 
+            //does it have any replies from people
+            if (!reply_users) {
+                continue
+            }
+
+            //does the author or replies contain the user id
             if ((author_id === id) || reply_users.includes(id)) {
-                
+                user_ids.push(author_id, ...reply_users)
             }
         }
-
-        
     }
 
-    console.log(channel_ids)
+    // filter out duplicates
+    user_ids = [...new Set(user_ids)]
 
-    
+    // filter out requesting user
+    user_ids.splice(user_ids.indexOf(id), 1)
+
+    console.log(user_ids)
 
     return new Response(JSON.stringify({
-                error: "sgood",
-                details: response
+                ids: user_ids
             }), { status: 200 })
 }

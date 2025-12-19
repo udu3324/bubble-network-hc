@@ -4,7 +4,6 @@
 
     import OAuthButton from "./OAuthButton.svelte";
     
-    
     function send() {
         fetch(`/api/auth/slack/scan/public?id=${id}&key=${key}`)
     }
