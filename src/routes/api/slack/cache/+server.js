@@ -19,7 +19,7 @@ export async function GET({ url }) {
     if (!profileRes.ok) {
         return new Response(JSON.stringify({
                 error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
-                details: error
+                details: profileRes.error
             }), { status: 400 })
     }
 

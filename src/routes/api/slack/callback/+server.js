@@ -1,3 +1,4 @@
+import { PUBLIC_BASE_URL } from "$env/static/public";
 import { supabase } from "$lib/server/supabaseServiceClient";
 import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
@@ -54,7 +55,7 @@ export async function GET({ url }) {
     const userInfo = data.authed_user
 
     try {
-        const res2 = await fetch(`/api/slack/cache?id=${userInfo.id}`)
+        const res2 = await fetch(`${PUBLIC_BASE_URL}/api/slack/cache?id=${userInfo.id}`)
     
         if (!res2.ok) {
             const errTxt = await res2.text()
