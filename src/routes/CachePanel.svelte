@@ -1,5 +1,23 @@
+<script>
+    import { isAuthed } from "$lib";
+
+    let output = "..."
+    let disableCaching = false
+
+    function cache() {
+        //todo
+    }
+</script>
 <div>
-    test
+    {#if $isAuthed}
+    <div class="w-full bg-slate-800 rounded-lg p-3 mt-8">
+        <button disabled={disableCaching} onclick={cache}>Cache Built Network</button>
+
+        <div class="bg-slate-300 min-h-10 p-2 rounded-lg mt-2 text-black">
+            <span class="font-mono">{output}</span>
+        </div>
+    </div>
+    {/if}
 </div>
 
 <style lang="postcss">
