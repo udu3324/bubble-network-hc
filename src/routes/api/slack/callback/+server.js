@@ -66,7 +66,7 @@ export async function GET({ url }) {
     } catch (err) {
         return new Response(JSON.stringify({
             error: "something very very bad happened... internal endpoint call to cache failed with an error, please report this to someone!",
-            details: err
+            details: err.message
         }), { status: 400 })
     }
 
