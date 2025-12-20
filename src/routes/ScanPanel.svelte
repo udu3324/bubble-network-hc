@@ -1,6 +1,7 @@
 <script>
 
     import { isAuthed } from "$lib";
+    import { onMount } from "svelte";
 
     let status = ""
     let output = "..."
@@ -8,7 +9,12 @@
     let currentlyScanning = false
     let disableClearingData = true
 
-    let hasData = true //todo
+    let hasData = false
+    $: {
+        if (!hasData) {
+            disableClearingData = true
+        }
+    }
 
     let fun_messages = [
         "the wait time for a scan to finish depends on how many channels you're in",
@@ -59,22 +65,25 @@
             }
         })
 
+        clearInterval(interval)
+
         if (!res.ok) {
+
             status = "failed"
+
             const data = await res.json()
             output = "error: " + JSON.stringify(data)
-            clearInterval(interval)
+
             currentlyScanning = false
-            disableClearingData = false
+            disableClearingData = !hasData
+
             return
         }
 
         currentlyScanning = false
         disableClearingData = false
 
-        clearInterval(interval)
-
-        const data = await res.json()
+        const data = await res.json() //todo do something with this
 
         status = "done"
         output = `found ${data.ids.length} connections`
@@ -84,6 +93,25 @@
     async function clear() {
         //todo
     }
+
+    onMount(async () => {
+        if (!localStorage.getItem("user_id")) {
+            return
+        }
+        
+        try {
+            //check if their id is stored in the network
+            const res = await fetch(`/api/supabase/network?id=${localStorage.getItem("user_id").replaceAll("\"", "")}`)
+
+            if (res.ok) {
+                hasData = true
+                disableClearingData = false
+                console.log("user has stored stuff in the network")
+            }
+        } catch (err) {
+            console.log("got error" + err)
+        }
+    })
 </script>
 
 <div>

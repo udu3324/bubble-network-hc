@@ -53,38 +53,21 @@ export async function GET({ url }) {
     
     const userInfo = data.authed_user
 
-    const web = new WebClient(userInfo.access_token) 
-    const profileRes = await web.users.profile.get({
-        user: userInfo.id
-    })
+    try {
+        const res2 = await fetch(`/api/slack/cache?id=${userInfo.id}`)
     
-    if (!profileRes.ok) {
-        return new Response(JSON.stringify({
-                error: "something bad happened... slack api users.profile.get failed with an error, please report this to someone!",
-                details: error
-            }), { status: 400 })
-    }
-
-    const { profile } = profileRes
-
-    let username = (profile.display_name.length === 0) ? profile.real_name : profile.display_name
-
-    const { error } = await supabase
-        .from('cache')
-        .upsert({
-            modified_at: new Date().toISOString(),
-            slack_id: userInfo.id,
-            username: username,
-            profile_picture: profile.image_192
-        }, {
-            onConflict: 'slack_id'
-        })
-
-    if (error) {
-        return new Response(JSON.stringify({
+        if (!res2.ok) {
+            const errTxt = await res2.text()
+            return new Response(JSON.stringify({
                 error: "something bad happened... cache storage failed with an error, please report this to someone!",
-                details: error
+                details: errTxt
             }), { status: 400 })
+        }
+    } catch (err) {
+        return new Response(JSON.stringify({
+            error: "something very very bad happened... internal endpoint call to cache failed with an error, please report this to someone!",
+            details: err
+        }), { status: 400 })
     }
 
     // save user info for slack api
