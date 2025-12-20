@@ -12,7 +12,7 @@
 
     let intervalCheck
 
-    const redirect = encodeURIComponent(`${PUBLIC_BASE_URL}/api/auth/slack/callback`)
+    const redirect = encodeURIComponent(`${PUBLIC_BASE_URL}/api/slack/callback`)
 
     const userScopes = [
       "channels:history",
