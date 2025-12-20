@@ -7,21 +7,46 @@
     let status = ""
     let output = "..."
 
+    let currentlyScanning = false
+    let disableClearingData = true
+
+    let hasData = false //todo
+
     let fun_messages = [
         "the wait time for a scan to finish depends on how many channels you're in",
         "i made this website during finals week",
+        "svelte all day any day",
         "#bubble on slack for the official channel",
-        "how do i privacy policy"
+        "how do i make a privacy policy",
+        "so, hows your day"
     ]
+    let fun_msg_index = 0
 
     let interval
-    let elapsed = 0
+    let elapsed = 0.1
+
+    $: {
+        //every 4 seconds
+        if (Number.isInteger(elapsed / 4)) {
+            output = fun_messages[fun_msg_index]
+
+            fun_msg_index++
+
+            if (fun_msg_index >= fun_messages.length) {
+                fun_msg_index = 0
+            }
+        }
+    }
 
     async function send() {
 
-        if (interval) return
+        if (currentlyScanning) {
+            return
+        }
 
         status = "scanning"
+        currentlyScanning = true
+        disableClearingData = true
 
         elapsed = 0
         interval = setInterval(() => {
@@ -41,15 +66,21 @@
             const data = await res.json()
             output = "error: " + JSON.stringify(data)
             clearInterval(interval)
+            currentlyScanning = false
+            disableClearingData = false
             return
         }
+
+        currentlyScanning = false
+        disableClearingData = false
+
+        clearInterval(interval)
 
         const data = await res.json()
 
         status = "done"
         output = `found ${data.ids.length} connections`
 
-        clearInterval(interval)
     }
 
     async function clear() {
@@ -67,8 +98,8 @@
     {#if $isAuthed}
     <div class="w-full bg-slate-800 rounded-lg p-3 mt-8">
         <div>
-            <button on:click={send}><i class="fa-solid fa-magnifying-glass text-xs"></i> Start Scan</button>
-            <button on:click={clear} disabled="true"><i class="fa-solid fa-trash-can text-xs"></i> Clear Data</button>
+            <button on:click={send} disabled={currentlyScanning}><i class="fa-solid fa-magnifying-glass text-xs"></i> Start Scan</button>
+            <button on:click={clear} disabled={disableClearingData || !hasData}><i class="fa-solid fa-trash-can text-xs"></i> Clear Data</button>
         </div>
 
         {#if status === "scanning"}
@@ -101,5 +132,9 @@
     
     button {
         @apply p-3 bg-slate-900 text-slate-300 rounded-lg cursor-pointer hover:bg-slate-600;
+    }
+
+    button:disabled {
+        @apply bg-slate-900 text-slate-800 cursor-auto; 
     }
 </style>
