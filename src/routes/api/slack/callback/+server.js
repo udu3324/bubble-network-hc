@@ -25,7 +25,7 @@ export async function GET({ url }) {
 
     //slack api has now given a code that can be exchanged for an api token
 
-    const redirectURI = `${process.env.PUBLIC_BASE_URL}/api/auth/slack/callback`
+    const redirectURI = `${process.env.PUBLIC_BASE_URL}/api/slack/callback`
 
     const res = await fetch("https://slack.com/api/oauth.v2.access", {
         method: "POST",
