@@ -42,7 +42,7 @@
         localStorage.removeItem("token");
     }
 
-    function check() {
+    async function check() {
         const id = localStorage.getItem("user_id")
 
         if (id) {
@@ -50,6 +50,21 @@
             isAuthed.set(true)
 
             statusText = "Authenticated"
+
+            try {
+                if (hasData) return
+                
+                //check if their id is stored in the network
+                const res = await fetch(`/api/supabase/network?id=${id}`)
+
+                if (res.ok) {
+                    hasData.set(true)
+                    disableClearingData = false
+                    console.log("user has stored stuff in the network")
+                }
+            } catch (err) {
+                console.log("got error" + err)
+            }
         } else {
             buttonDisabled = false
             isAuthed.set(false)

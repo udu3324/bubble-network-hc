@@ -1,6 +1,6 @@
 <script>
 
-    import { isAuthed } from "$lib";
+    import { hasData, isAuthed } from "$lib";
     import { onMount } from "svelte";
 
     let status = ""
@@ -9,12 +9,11 @@
     let currentlyScanning = false
     let disableClearingData = true
 
-    let hasData = false
-    $: {
-        if (!hasData) {
+    hasData.subscribe((value) => {
+        if (!value) {
             disableClearingData = true
         }
-    }
+    })
 
     let fun_messages = [
         "the wait time for a scan to finish depends on how many channels you're in",
@@ -104,7 +103,7 @@
             const res = await fetch(`/api/supabase/network?id=${localStorage.getItem("user_id").replaceAll("\"", "")}`)
 
             if (res.ok) {
-                hasData = true
+                hasData.set(true)
                 disableClearingData = false
                 console.log("user has stored stuff in the network")
             }
