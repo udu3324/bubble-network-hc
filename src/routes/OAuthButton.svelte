@@ -1,6 +1,6 @@
 <script>
 
-    import { isAuthed } from "$lib";
+    import { hasData, isAuthed } from "$lib";
 
     import { onDestroy, onMount } from 'svelte';
 
@@ -53,7 +53,7 @@
 
             try {
                 if (hasData) return
-                
+
                 //check if their id is stored in the network
                 const res = await fetch(`/api/supabase/network?id=${id}`)
 
