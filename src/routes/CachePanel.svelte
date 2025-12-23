@@ -1,8 +1,12 @@
 <script>
-    import { isAuthed } from "$lib";
+    import { hasData, isAuthed } from "$lib";
 
     let output = "..."
-    let disableCaching = false
+    let disableCaching = true
+
+    hasData.subscribe((value) => {
+        disableCaching = !hasData
+    })
 
     function cache() {
         //todo

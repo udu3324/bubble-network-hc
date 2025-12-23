@@ -17,9 +17,6 @@
     const userScopes = [
       "channels:history",
       "channels:read",
-      "groups:read",
-      "im:read",
-      "mpim:read",
       "users.profile:read",
       "users:read"
     ].join(",");
