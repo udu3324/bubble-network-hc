@@ -3,19 +3,84 @@
 
     let output = "..."
     let disableCaching = true
+    let currentlyWaiting = false
+
+    let status = ""
+    let interval
+    let elapsed = 0
 
     hasData.subscribe((value) => {
-        disableCaching = !hasData
+        disableCaching = !value
     })
 
-    function cache() {
-        //todo
+    async function cache() {
+        if (currentlyWaiting) {
+            return
+        }
+
+        status = "waiting"
+        let output = "..."
+        currentlyWaiting = true
+        disableCaching = true
+
+        elapsed = 0
+        interval = setInterval(() => {
+			elapsed += 1
+		}, 1000)
+
+        const res = await fetch('/api/supabase/ncache', {
+            method: "GET",
+            headers: {
+                "authorization": `Bearer ${localStorage.getItem("token").replaceAll("\"", "")}`,
+                "slack_id": localStorage.getItem("user_id").replaceAll("\"", "")
+            }
+        })
+
+        clearInterval(interval)
+
+        if (!res.ok) {
+
+            status = "failed"
+
+            const data = await res.json()
+            output = "error: " + JSON.stringify(data)
+
+            currentlyWaiting = false
+            disableCaching = false
+
+            return
+        }
+
+        currentlyWaiting = false
+        disableCaching = false
+
+        const data = await res.json() //todo do something with this
+
+        status = "done"
+        output = `all your connections have been cached`
     }
 </script>
 <div>
     {#if $isAuthed}
     <div class="w-full bg-slate-800 rounded-lg p-3 mt-8">
         <button disabled={disableCaching} onclick={cache}>Cache Built Network</button>
+        
+        {#if status === "waiting"}
+        <div class="bg-sky-900 rounded-lg p-2 mt-2 flex">
+            <i class="fa-solid fa-spinner animate-spin text-2xl mr-1"></i>
+            <span>({elapsed}s) please wait</span>
+        </div>
+        {:else if status === "done"}
+        <div class="bg-green-700 rounded-lg p-2 mt-2 flex">
+            <i class="fa-solid fa-check text-2xl mr-1"></i>
+            <span>sucessful</span>
+        </div>
+        {:else if status === "failed"}
+        <div class="bg-red-700 rounded-lg p-2 mt-2 flex">
+            <i class="fa-solid fa-triangle-exclamation text-2xl mr-1"></i>
+            <span>failed</span>
+        </div>
+        {/if}
 
         <div class="bg-slate-300 min-h-10 p-2 rounded-lg mt-2 text-black">
             <span class="font-mono">{output}</span>

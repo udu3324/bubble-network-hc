@@ -1,4 +1,5 @@
 import { PUBLIC_BASE_URL } from "$env/static/public";
+import { inOrg } from "$lib/server";
 import { supabase } from "$lib/server/supabaseServiceClient";
 import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
@@ -37,7 +38,7 @@ export async function GET({ url }) {
             code,
             client_id: process.env.SLACK_CLIENT_ID,
             client_secret: process.env.SLACK_CLIENT_SECRET,
-            redirect_url: redirectURI
+            redirect_uri: redirectURI
         })
     })
 
@@ -53,6 +54,15 @@ export async function GET({ url }) {
     // save user id, display name, and pfp url to supabase
     
     const userInfo = data.authed_user
+
+    // check if oauth is inside specific org
+    const insideOrg = inOrg(userInfo.access_token)
+
+    if (!insideOrg) {
+        return new Response(JSON.stringify({
+                error: "your organization is not authorized to use this app",
+            }), { status: 400 })
+    }
 
     try {
         const res2 = await fetch(`${PUBLIC_BASE_URL}/api/slack/cache?id=${userInfo.id}`)

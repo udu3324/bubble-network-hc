@@ -81,6 +81,7 @@
 
         currentlyWaiting = false
         disableClearingData = false
+        hasData.set(true)
 
         const data = await res.json() //todo do something with this
 
