@@ -6,7 +6,7 @@
     let status = ""
     let output = "..."
 
-    let currentlyScanning = false
+    let currentlyWaiting = false
     let disableClearingData = true
 
     hasData.subscribe((value) => {
@@ -43,12 +43,12 @@
 
     async function send() {
 
-        if (currentlyScanning) {
+        if (currentlyWaiting) {
             return
         }
 
-        status = "scanning"
-        currentlyScanning = true
+        status = "waiting"
+        currentlyWaiting = true
         disableClearingData = true
 
         elapsed = 0
@@ -73,13 +73,13 @@
             const data = await res.json()
             output = "error: " + JSON.stringify(data)
 
-            currentlyScanning = false
+            currentlyWaiting = false
             disableClearingData = !hasData
 
             return
         }
 
-        currentlyScanning = false
+        currentlyWaiting = false
         disableClearingData = false
 
         const data = await res.json() //todo do something with this
@@ -90,7 +90,33 @@
     }
 
     async function clear() {
-        //todo
+        const res = await fetch('/api/supabase/clear', {
+            method: "GET",
+            headers: {
+                "authorization": `Bearer ${localStorage.getItem("token").replaceAll("\"", "")}`,
+                "slack_id": localStorage.getItem("user_id").replaceAll("\"", "")
+            }
+        })
+
+        if (!res.ok) {
+
+            status = "failed"
+
+            const data = await res.json()
+            output = "error: " + JSON.stringify(data)
+
+            currentlyWaiting = false
+            disableClearingData = !hasData
+
+            return
+        }
+
+        status = "done"
+        const data = await res.json()
+        output = `details: ${data.details}`
+
+        hasData.set(false)
+        disableClearingData = true
     }
 
     onMount(async () => {
@@ -117,24 +143,24 @@
     {#if $isAuthed}
     <div class="w-full bg-slate-800 rounded-lg p-3 mt-8">
         <div>
-            <button on:click={send} disabled={currentlyScanning}><i class="fa-solid fa-magnifying-glass text-xs"></i> Start Scan</button>
+            <button on:click={send} disabled={currentlyWaiting}><i class="fa-solid fa-magnifying-glass text-xs"></i> Start Scan</button>
             <button on:click={clear} disabled={disableClearingData}><i class="fa-solid fa-trash-can text-xs"></i> Clear Data</button>
         </div>
 
-        {#if status === "scanning"}
+        {#if status === "waiting"}
         <div class="bg-sky-900 rounded-lg p-2 mt-2 flex">
             <i class="fa-solid fa-spinner animate-spin text-2xl mr-1"></i>
-            <span>({elapsed}s) currently scanning</span>
+            <span>({elapsed}s) please wait</span>
         </div>
         {:else if status === "done"}
         <div class="bg-green-700 rounded-lg p-2 mt-2 flex">
             <i class="fa-solid fa-check text-2xl mr-1"></i>
-            <span>sucessfully scanned</span>
+            <span>sucessful</span>
         </div>
         {:else if status === "failed"}
         <div class="bg-red-700 rounded-lg p-2 mt-2 flex">
             <i class="fa-solid fa-triangle-exclamation text-2xl mr-1"></i>
-            <span>failed scan</span>
+            <span>failed</span>
         </div>
         {/if}
 
