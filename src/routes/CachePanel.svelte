@@ -54,8 +54,6 @@
         currentlyWaiting = false
         disableCaching = false
 
-        const data = await res.json() //todo do something with this
-
         status = "done"
         output = `all your connections have been cached`
     }

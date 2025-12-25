@@ -1,38 +1,41 @@
-# sv
+# bubble network
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A website that visualizes who you are connected to in slack.
 
-## Creating a project
+## how it works
 
-If you're seeing this, you've probably already done this step. Congrats!
+Oauth access gives slack endpoints to reveal what **public** channels you are in. It can then be scanned with the most recent 1000 messages. From there, it checks if the message is a thread and if you are the author or have replied in it.
 
-```sh
-# create a new project in the current directory
-npx sv create
+**How is this a Good Metric**    
 
-# create a new project in my-app
-npx sv create my-app
+It's not. Well, its close enough. Slack does offer scopes to reveal dmed users, group conversations, or private channels, but the bot itself has to be invited to them to see it. I do not know a workaround to this unless if everyone is willing to invite the bot to every channel or it gets admin workspace access.
+
+## development
+
+To setup a dev enviornment, make sure you have nodejs installed with npm. Clone it into your favorite IDE and run the commands below!
+
 ```
+npm install
 
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+Slack OAuth **DOES NOT WORK** in the dev enviornment as the callback points back to the real domain. I think there's a way to fix this but im too lazy. As a workaround, you can oauth from production and export your localstorage variables and reimport into localhost. 
 
-To create a production version of your app:
+## environment variables
 
-```sh
-npm run build
 ```
 
-You can preview the production build with `npm run preview`.
+SLACK_ORGANIZATION_ID=
+SLACK_CLIENT_ID=
+SLACK_CLIENT_SECRET=
+SLACK_BOT_OAUTH_TOKEN=
+PUBLIC_BASE_URL=
+PUBLIC_SLACK_APP_CLIENT_ID=
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+PUBLIC_SUPABASE_URL=
+PUBLIC_SUPABASE_ANON_KEY=
+
+SUPABASE_SERVICE_ROLE_KEY=
+
+```

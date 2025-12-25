@@ -15,7 +15,7 @@ export async function GET({ url }) {
         if (error1 == "access_denied") {
             return new Response(JSON.stringify({
                 error: "you pressed cancel! if you are concerned about privacy, read this",
-                details: `${process.env.PUBLIC_BASE_URL}/privacy`
+                details: `${process.env.PUBLIC_BASE_URL}/info`
             }), { status: 400 })
         } else {
             return new Response(JSON.stringify({

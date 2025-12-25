@@ -114,8 +114,6 @@ export async function GET({ request }) {
             }), { status: 400 })
     }
 
-    //todo cache of their ids
-
     //console.log(user_ids)
 
     return json({
