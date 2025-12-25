@@ -15,6 +15,16 @@
 
     <OAuthButton/>
     
+    <div class="bg-slate-300 text-slate-800 p-3 rounded-lg mt-2">
+        <h1 class="font-bold" title="hover over the other ones lol">instructions (hover)</h1>
+        <ul>
+            <li title="oauth into slack, this information is stored in localstorage">1, login </li>
+            <li title="this will look through all the public channels you are in">2, start scan</li>
+            <li title="gets people's display names and profile pictures">3, cache network</li>
+            <li title="the panel on the right should be ready">4, done! look at the visualizer</li>
+        </ul>
+    </div>
+
     <ScanPanel/>
     <CachePanel/>
     

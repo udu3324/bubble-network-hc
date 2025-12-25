@@ -145,7 +145,7 @@
     <div class="w-full bg-slate-800 rounded-lg p-3 mt-8">
         <div>
             <button on:click={send} disabled={currentlyWaiting}><i class="fa-solid fa-magnifying-glass text-xs"></i> Start Scan</button>
-            <button on:click={clear} disabled={disableClearingData}><i class="fa-solid fa-trash-can text-xs"></i> Clear Data</button>
+            <button on:click={clear} disabled={disableClearingData} class="text-[0.8rem]"><i class="fa-solid fa-trash-can text-xs"></i> Clear Data</button>
         </div>
 
         {#if status === "waiting"}

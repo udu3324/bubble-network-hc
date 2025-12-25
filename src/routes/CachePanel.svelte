@@ -63,7 +63,7 @@
 <div>
     {#if $isAuthed}
     <div class="w-full bg-slate-800 rounded-lg p-3 mt-8">
-        <button disabled={disableCaching} onclick={cache}>Cache Built Network</button>
+        <button disabled={disableCaching} onclick={cache}><i class="fa-solid fa-cubes"></i> Cache Network</button>
         
         {#if status === "waiting"}
         <div class="bg-sky-900 rounded-lg p-2 mt-2 flex">
