@@ -19,7 +19,7 @@
         }
 
         status = "waiting"
-        let output = "..."
+        output = "..."
         currentlyWaiting = true
         disableCaching = true
 
@@ -43,7 +43,7 @@
             status = "failed"
 
             const data = await res.json()
-            output = "error: " + JSON.stringify(data)
+            output = JSON.stringify(data)
 
             currentlyWaiting = false
             disableCaching = false

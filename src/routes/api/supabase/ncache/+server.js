@@ -48,14 +48,19 @@ export async function GET({ request }) {
 
     const id_list = data.id_list
     
-    let count = 0
+    //let count = 0
     //console.log("total", id_list.length)
     //console.log(id_list)
 
     const tasks = id_list.map(id => 
         limit( async () => {
-            count++
+            //count++
             //console.log(`on currently ${count} of ${id}`)
+
+            // no clue how this would happen
+            if (typeof id !== "string") {
+                return
+            }
 
             // bots break?
             if (id.startsWith('B')) {
