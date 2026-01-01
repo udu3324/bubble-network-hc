@@ -1,5 +1,5 @@
 import { PUBLIC_BASE_URL } from "$env/static/public";
-import { inOrg } from "$lib/server";
+import { inOrg, webhookLogSend } from "$lib/server";
 import { supabase } from "$lib/server/supabaseServiceClient";
 import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
@@ -18,6 +18,8 @@ export async function GET({ url }) {
                 details: `${process.env.PUBLIC_BASE_URL}/info`
             }), { status: 400 })
         } else {
+            webhookLogSend(`unknown initial oauth error of ${error1}`)
+
             return new Response(JSON.stringify({
                 error: "something bad happened... please report this to someone!",
                 details: error1
@@ -45,6 +47,8 @@ export async function GET({ url }) {
     const data = await res.json()
 
     if (!data.ok) {
+        webhookLogSend(`unknown stage 1 oauth error\n${data}\n${data.error}`)
+
         return new Response(JSON.stringify({
             error: "something bad has happened... slack oauth has failed, please report this to someone!",
             details: data.error
@@ -59,6 +63,8 @@ export async function GET({ url }) {
     const insideOrg = inOrg(userInfo.access_token)
 
     if (!insideOrg) {
+        webhookLogSend(`id-${userInfo.id} tried oauth of wrong organization`)
+
         return new Response(JSON.stringify({
                 error: "your organization is not authorized to use this app",
             }), { status: 400 })
@@ -69,12 +75,17 @@ export async function GET({ url }) {
     
         if (!res2.ok) {
             const errTxt = await res2.text()
+
+            webhookLogSend(`id-${userInfo.id} failed db cache storage\n${errTxt}`)
+
             return new Response(JSON.stringify({
                 error: "something bad happened... cache storage failed with an error, please report this to someone!",
                 details: errTxt
             }), { status: 400 })
         }
     } catch (err) {
+        webhookLogSend(`id-${userInfo.id} failed db cache storage but worse\n${err}\n${err.message}`)
+
         return new Response(JSON.stringify({
             error: "something very very bad happened... internal endpoint call to cache failed with an error, please report this to someone!",
             details: err.message

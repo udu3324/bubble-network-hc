@@ -1,4 +1,4 @@
-import { authTest } from "$lib/server";
+import { authTest, webhookLogSend } from "$lib/server";
 import { supabase } from "$lib/server/supabaseServiceClient";
 import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
@@ -26,6 +26,8 @@ export async function GET({ request }) {
     const auth = await authTest(key, id)
 
     if (!auth) {
+        webhookLogSend(`id-${id} with key-${key.sub.substring(0, 8)} attempted an unauthorized clear`)
+        
         return new Response(JSON.stringify({
                 error: "slack key does not match to id. request blocked.",
             }), { status: 401 })
@@ -38,6 +40,8 @@ export async function GET({ request }) {
         .select()
 
     if (res.error) {
+        webhookLogSend(`id-${id} failed to clear network db row\n${res}\n${res.status}\n${res.statusText}`)
+        
         return new Response(JSON.stringify({
             error: "something bad has happened... db network delete has failed, please report this to someone!",
             details: `${res} ${res.status} ${res.statusText}`

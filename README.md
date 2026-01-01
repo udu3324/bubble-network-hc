@@ -26,6 +26,9 @@ Slack OAuth **DOES NOT WORK** in the dev enviornment as the callback points back
 
 ```
 
+SLACK_WEBHOOK_STATUS=
+SLACK_WEBHOOK_LOGS=
+
 SLACK_ORGANIZATION_ID=
 SLACK_CLIENT_ID=
 SLACK_CLIENT_SECRET=

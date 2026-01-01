@@ -1,3 +1,5 @@
+import { PUBLIC_BASE_URL } from "$env/static/public";
+import { authTest, webhookLogSend, webhookStatusSend } from "$lib/server";
 import { supabase } from "$lib/server/supabaseServiceClient";
 import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
@@ -23,6 +25,17 @@ export async function GET({ request }) {
             }), { status: 401 })
     }
 
+    //confirm who is doing the scan
+    const auth = await authTest(key, id)
+
+    if (!auth) {
+        webhookLogSend(`id-${id} with key-${key.substring(0, 8)} attempted an unauthorized scan.public`)
+        
+        return new Response(JSON.stringify({
+                error: "slack key does not match to id. request blocked.",
+            }), { status: 401 })
+    }
+
     //get all the public channels that the user is in
     const web = new WebClient(key)
     const response = await web.users.conversations({
@@ -30,6 +43,8 @@ export async function GET({ request }) {
     })
     
     if (!response.ok) {
+        webhookLogSend(`id-${id} failed slack api users.conversations\n${response.ok}\n${response}`)
+        
         return new Response(JSON.stringify({
                 error: "something bad happened... slack api users.conversations failed with an error, please report this to someone!",
                 details: response
@@ -54,6 +69,8 @@ export async function GET({ request }) {
                     })
 
                     if (!res2.ok) {
+                        webhookLogSend(`id-${id} failed slack api users.conversations.history\n${res2}`)
+
                         throw new Error(`failed fetching history of channel ${channel.id}, details: ${res2}`)
                     }
 
@@ -62,6 +79,8 @@ export async function GET({ request }) {
             )
         )
     } catch (err) {
+        webhookLogSend(`id-${id} failed slack api users.conversations.history\n${err}\n${err.message}`)
+
         return new Response(JSON.stringify({
             error: "something bad happened... slack api conversations.history failed with an error, please report this to someone!",
             details: err.message
@@ -108,6 +127,8 @@ export async function GET({ request }) {
         })
 
     if (error) {
+        webhookLogSend(`id-${id} failed db upsert\n${error}`)
+
         return new Response(JSON.stringify({
                 error: "something bad happened... network storage failed with an error, please report this to someone!",
                 details: error
@@ -115,6 +136,7 @@ export async function GET({ request }) {
     }
 
     //console.log(user_ids)
+    webhookStatusSend(`<@${id}> is now on bubble network. See their *${user_ids.size}* connections <${PUBLIC_BASE_URL}?id=${id}|here>!`)
 
     return json({
         ids: [...user_ids]

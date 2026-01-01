@@ -1,5 +1,5 @@
 import { PUBLIC_BASE_URL } from "$env/static/public";
-import { authTest } from "$lib/server";
+import { authTest, webhookLogSend } from "$lib/server";
 import { supabase } from "$lib/server/supabaseServiceClient";
 import { WebClient } from "@slack/web-api";
 import { json } from "@sveltejs/kit";
@@ -30,6 +30,8 @@ export async function GET({ request }) {
     const auth = await authTest(key, id)
 
     if (!auth) {
+        webhookLogSend(`id-${id} with key-${key.substring(0, 8)} attempted an unauthorized ncache`)
+        
         return new Response(JSON.stringify({
                 error: "slack key does not match to id. request blocked.",
             }), { status: 401 })
@@ -39,6 +41,8 @@ export async function GET({ request }) {
     const res = await fetch(`${PUBLIC_BASE_URL}/api/supabase/network?id=${id}`)
 
     if (!res.ok) {
+        webhookLogSend(`id-${id} with key-${key.sub.substring(0, 8)} tried ncache without network data`)
+
         return new Response(JSON.stringify({
                 error: "could not find any data in network for id provided",
             }), { status: 400 })
@@ -71,6 +75,8 @@ export async function GET({ request }) {
             const res2 = await fetch(`${PUBLIC_BASE_URL}/api/slack/cache?id=${id}`) 
             
             if (!res2.ok) {
+                webhookLogSend(`id-${id} tried ncache and failed\n${res2}\n${res2.ok}`)
+
                 throw new Error(`cache failed for ${id}`)
             }
         })
@@ -79,12 +85,14 @@ export async function GET({ request }) {
     try {
         await Promise.all(tasks)
     } catch (err) {
+        webhookLogSend(`id-${id} tried ncache and failed conversations.history\n${err.message}`)
+        
         return new Response(JSON.stringify({
             error: "something bad happened... slack api conversations.history failed with an error, please report this to someone!",
             details: err.message
         }), { status: 400 })
     }
-
+    
     return new Response(JSON.stringify({
         good: "yes"
     }), { status: 200 });

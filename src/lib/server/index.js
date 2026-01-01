@@ -1,4 +1,4 @@
-import { SLACK_ORGANIZATION_ID } from "$env/static/private"
+import { SLACK_ORGANIZATION_ID, SLACK_WEBHOOK_STATUS, SLACK_WEBHOOK_LOGS } from "$env/static/private"
 import { WebClient } from "@slack/web-api"
 
 export async function authTest(key, id) {
@@ -21,4 +21,36 @@ export async function inOrg(key) {
     }
 
     return false
+}
+
+// <3 https://stackoverflow.com/a/47065313/16216937
+export async function webhookStatusSend(message) { //public channel
+    await fetch(SLACK_WEBHOOK_STATUS, {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({
+            "text": message
+        })
+    }).then(res => {
+        //console.log("Request complete! response:", res);
+    });
+}
+
+export async function webhookLogSend(message) { //private
+    await fetch(SLACK_WEBHOOK_LOGS, {
+        method: "POST",
+        headers: {'Content-Type': 'application/json'}, 
+        body: JSON.stringify({
+            "text": `\`${new Date().toUTCString()}\` ${sanitize(message)}`
+        })
+    }).then(res => {
+        //console.log("Request complete! response:", res);
+    });
+}
+
+function sanitize(string) {
+    return string
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
 }
