@@ -14,7 +14,7 @@
     </div>
 
     <div class="pb-3 font-extralight italic">
-        <a href="/info" target="_blank">info</a> - 
+        <a href="/info">info</a> - 
         <a href="https://github.com/udu3324/bubble-network-hc" target="_blank">source code</a>
     </div>
 
