@@ -1,6 +1,35 @@
 import { writable } from "svelte/store";
 
-export var maxPos = writable(4000)
+export let centerX = 0
+export let centerY = 0
+
+export var canvas
+export var ctx
+export function setCanvas(canv) {
+    canvas = canv
+    ctx = canvas.getContext('2d')
+
+    centerX = canvas.width / 2
+    centerY = canvas.height / 2
+}
+
+
+
+export let cameraX = 0
+export function setCameraX(i) {
+    cameraX = i
+}
+export let cameraY = 0
+export function setCameraY(i) {
+    cameraY = i
+}
+
+export let cameraZoom = 0.05 // higher = zoomed in
+export function setCameraZoom(i) {
+    cameraZoom = i
+}
+
+export let maxPos = writable(4000)
 
 class Vector2 {
     constructor(x, y) {
@@ -295,6 +324,13 @@ class Shell { // centerNode = actual king node, shell# 1-max count, radius = rad
             this.angles.push(angle);
         }
     }
+}
+
+export function posX(x) {
+    return (x - cameraX) * cameraZoom + centerX;
+}
+export function posY(y) {
+    return (y - cameraY) * cameraZoom + centerY;
 }
 
 export { Vector2, Node, Connection, Shell }

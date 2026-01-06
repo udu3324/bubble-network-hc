@@ -1,6 +1,7 @@
 <script>
+    import { cameraX, cameraY, cameraZoom, centerX, centerY, Connection, ctx, posX, posY, setCameraX, setCameraY, setCameraZoom, setCanvas, Shell, Vector2 } from "$lib/visualizer";
     import { onMount } from "svelte";
-
+    
     let divis
     let canvas
     let canvasWidth = 0
@@ -37,35 +38,15 @@
 
         const websiteMode = false; // turn on when using server data, off when using random data (need to call gen() function for website)
 
-        var ctx = canvas.getContext('2d');
-
-        var centerX = canvas.width / 2;
-        var centerY = canvas.height / 2;
-
-        var cameraX = 0;
-        var cameraY = 0;
-
-        var cameraZoom = 0.05; // higher = zoomed in
-        var inputZoom = 12; // relative to 10
-
-        function posX(x) {
-            return (x - cameraX) * cameraZoom + centerX;
-        }
-        function posY(y) {
-            return (y - cameraY) * cameraZoom + centerY;
-        }
-
-
-
-
+        setCanvas(canvas)
 
         
-        class Vector2 {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-            }
-        }
+
+        
+
+        var inputZoom = 12; // relative to 10
+
+
         class Node { // id correlates to id in the list of peoples
             constructor(slackId, connections, id, connectionStrength) {
                 this.user = slackId; // SLACK ID
@@ -371,67 +352,9 @@
             }
         }
 
-        class Connection { // MAKE A FEATURE TO WHEN IF NOT FOCUSED AND NOT KING THEN IF YOUR ID IS GREATER THAN ANOTHER DON'T RENDER YOUR CONNECTIONS BC OTHER ID WILL
-            constructor(user1, user2, strength) {
-                this.user1 = user1;
-                this.user2 = user2;
-                this.strength = 8;
+        
 
-            }
-            display(color, doShadow) {
-                //ctx.globalAlpha -= 0.1;
-                if (doShadow) {
-                    ctx.strokeStyle = "white";
-                    ctx.beginPath();
-                    ctx.lineWidth = this.strength * cameraZoom * 1.2;
-                    ctx.moveTo(posX(this.user1.pos.x), posY(this.user1.pos.y));
-                    ctx.lineTo(posX(this.user2.pos.x), posY(this.user2.pos.y));
-                    ctx.stroke();
-                }
-                ctx.strokeStyle = color;
-                ctx.beginPath();
-                ctx.lineWidth = this.strength * cameraZoom;
-                ctx.moveTo(posX(this.user1.pos.x), posY(this.user1.pos.y));
-                ctx.lineTo(posX(this.user2.pos.x), posY(this.user2.pos.y));
-                //ctx.lineTo(0,0)
-                ctx.stroke();
-                //ctx.globalAlpha = 1
-            }
-        }
-
-        class Shell { // centerNode = actual king node, shell# 1-max count, radius = rad increasess, initcount = how many on first shell
-            constructor(centerNode, shellNumber, initRadius, initCount) {
-                this.centerNode = centerNode;
-                this.shellNumber = shellNumber;
-                this.radius = initRadius * shellNumber;
-                this.count = initCount * shellNumber;
-
-                this.x = centerNode.pos.x;
-                this.y = centerNode.pos.y;
-
-                this.children = []; // nodes belonging (ids)
-                this.angles = []; // node angles
-            }
-
-            display() {
-                ctx.strokeStyle = "white";
-                ctx.globalAlpha = 0.5;
-                ctx.lineWidth = cameraZoom * 2;
-
-                ctx.beginPath();
-                ctx.arc(posX(this.x), posY(this.y), this.radius * cameraZoom, 0, 2 * Math.PI)
-                ctx.stroke();
-            }
-
-            createAngles() { // after children are assigned
-                let angle = Math.PI * 2 * Math.random();
-                let d = Math.PI * 2 / this.children.length;
-                for (let i = 0; i < this.children.length; i++) {
-                    angle += d;
-                    this.angles.push(angle);
-                }
-            }
-        }
+        
 
 
 
@@ -605,19 +528,15 @@
             ctx.stroke();
 
 
-            // Update positional constants
-            centerX = canvas.width / 2;
-            centerY = canvas.height / 2;
-
-            cameraZoom += ds;
+            setCameraZoom(cameraZoom + ds)
             ds *= df;
 
             if (cameraZoom < 0.01) { // max zoom out
-                cameraZoom = 0.01;
+                setCameraZoom(0.01)
                 ds = 0;
             }
             if (cameraZoom > 10) { // max zoom in
-                cameraZoom = 10;
+                setCameraZoom(10)
                 ds = 0;
             }
             //cameraZoom = Math.sin(tick) + 1;
@@ -635,8 +554,8 @@
                 let dx = targetX - cameraX;
                 let dy = targetY - cameraY;
 
-                cameraX += dx / cameraEase;
-                cameraY += dy / cameraEase;
+                setCameraX(cameraX + (dx / cameraEase))
+                setCameraY(cameraY + (dy / cameraEase))
             } else {
                 if (prevCamX != null) {
                     prevCamX = null;
@@ -645,19 +564,19 @@
                 let dx = targetX - cameraX;
                 let dy = targetY - cameraY;
 
-                cameraX += dx / cameraEase;
-                cameraY += dy / cameraEase;
+                setCameraX(cameraX + (dx / cameraEase))
+                setCameraY(cameraY + (dy / cameraEase))
                 prevCamX = cameraX;
                 prevCamY = cameraY;
             }
 
             if (zoomToKing) {
-                cameraZoom += (0.2 - cameraZoom) / 30
+                setCameraZoom(cameraZoom + ((0.2 - cameraZoom) / 30))
                 let tX = nodes[king].pos.x;
                 let tY = nodes[king].pos.y;
 
-                cameraX += (tX - cameraX) / 10;
-                cameraY += (tY - cameraY) / 10;
+                setCameraX(cameraX + ((tX - cameraX) / 10))
+                setCameraY(cameraY + ((tY - cameraY) / 10))
                 targetX = cameraX;
                 targetY = cameraY;
             }
