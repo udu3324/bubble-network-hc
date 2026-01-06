@@ -53,14 +53,14 @@ export function setCameraZoom(i) {
 
 export let maxPos = writable(4000)
 
-class Vector2 {
+export class Vector2 {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
 }
 
-class Node { // id correlates to id in the list of peoples
+export class Node { // id correlates to id in the list of peoples
     constructor(slackId, connections, id, connectionStrength) {
         this.user = slackId; // SLACK ID
         this.id = id; // ID IN THE ARRAY
@@ -292,7 +292,7 @@ class Node { // id correlates to id in the list of peoples
     }
 }
 
-class Connection { // MAKE A FEATURE TO WHEN IF NOT FOCUSED AND NOT KING THEN IF YOUR ID IS GREATER THAN ANOTHER DON'T RENDER YOUR CONNECTIONS BC OTHER ID WILL
+export class Connection { // MAKE A FEATURE TO WHEN IF NOT FOCUSED AND NOT KING THEN IF YOUR ID IS GREATER THAN ANOTHER DON'T RENDER YOUR CONNECTIONS BC OTHER ID WILL
     constructor(user1, user2, strength) {
         this.user1 = user1;
         this.user2 = user2;
@@ -319,7 +319,7 @@ class Connection { // MAKE A FEATURE TO WHEN IF NOT FOCUSED AND NOT KING THEN IF
     }
 }
 
-class Shell { // centerNode = actual king node, shell# 1-max count, radius = rad increasess, initcount = how many on first shell
+export class Shell { // centerNode = actual king node, shell# 1-max count, radius = rad increasess, initcount = how many on first shell
     constructor(centerNode, shellNumber, initRadius, initCount) {
         this.centerNode = centerNode;
         this.shellNumber = shellNumber;
@@ -363,4 +363,4 @@ export function posY(y) {
     return (y - cameraY) * cameraZoom + centerY;
 }
 
-export { Vector2, Node, Connection, Shell }
+//export { Vector2, Node, Connection, Shell }
