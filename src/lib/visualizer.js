@@ -13,7 +13,29 @@ export function setCanvas(canv) {
     centerY = canvas.height / 2
 }
 
+// for hovering
+export let taken = null; // will be set to id of node getting touched innapropriately
+export function setTaken(x) {
+    taken = x
+}
 
+export let mouseX = 0;
+export function setMouseX(i) {
+    mouseX = i
+}
+export let mouseY = 0;
+export function setMouseY(i) {
+    mouseY = i
+}
+
+export let nodes = []; // one node for every user
+export let masterData = []; // {slackid, username, profile} username = display name
+export let slackIds = [];
+
+export let king = null
+export function setKing(i) {
+    king = i
+}
 
 export let cameraX = 0
 export function setCameraX(i) {
@@ -324,6 +346,14 @@ class Shell { // centerNode = actual king node, shell# 1-max count, radius = rad
             this.angles.push(angle);
         }
     }
+}
+
+function circ(x, y, r, c) {
+    ctx.fillStyle = c;
+    ctx.beginPath();
+    ctx.arc(posX(x), posY(y), r * cameraZoom, 0, 2 * Math.PI);
+    ctx.fill();
+    //alert(c)
 }
 
 export function posX(x) {
