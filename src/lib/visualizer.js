@@ -1,49 +1,6 @@
-import { writable } from "svelte/store"
+import { writable } from "svelte/store";
 
-export let maxPos = writable(4000)
-export let mapLoaded = false
-// HANDLE SLACK DATA
-export let nodes = writable([]) // one node for every user
-var slackIds = [];
-var slackConnections = [];
-var slackConnectionStrengths = []; // randomly generated
-
-// for smoothness
-var targetX = 0;
-var targetY = 0;
-
-
-// for hovering
-var taken = null; // will be set to id of node getting touched innapropriately
-
-// KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
-export var king = writable()
-var kingCircle = []; // people related to the king (ids)
-var kingStrengths = [];
-
-
-var kingShells = []; // shells to hold the nodes
-
-
-
-// shell constants
-const _shellInitCount = 3;
-const _shellInitRadius = 200;
-
-export const websiteMode = false
-
-// random names and images for testing
-var names = ["Amigo", "Friend", "Lonely", "Hacker"]
-var images = []; // contains urls
-images.push("https://images.pexels.com/photos/33713697/pexels-photo-33713697.jpeg");
-images.push("https://images.pexels.com/photos/35175266/pexels-photo-35175266.jpeg")
-images.push("https://images.pexels.com/photos/19829670/pexels-photo-19829670.jpeg");
-images.push("https://images.pexels.com/photos/35201958/pexels-photo-35201958.jpeg");
-images.push("https://images.pexels.com/photos/35109039/pexels-photo-35109039.jpeg");
-
-let masterArray = [];
-
-let masterData = []; // {slackid, username, profile} username = display name
+export var maxPos = writable(4000)
 
 class Vector2 {
     constructor(x, y) {
@@ -219,7 +176,7 @@ class Node { // id correlates to id in the list of peoples
             }
         }
         if (king == null && this.touched && mouseDown && !mouseMoving) {
-            king.set(this.id)
+            king = this.id;
         }
         this.circleTouched = false;
         // when in king mode hovering and stuff you know the drill
@@ -338,60 +295,6 @@ class Shell { // centerNode = actual king node, shell# 1-max count, radius = rad
             this.angles.push(angle);
         }
     }
-}
-
-export function randomSlackUser() {
-    let id = Math.random() + "";
-    masterArray.push({ "slack_id": id, "id_list": [], "id_list_special": null });
-    let myId = masterArray.length - 1;
-    let usedFriends = [];
-    for (let i = 0; i < 20; i++) {
-        let randomFriend = Math.floor(Math.random() * masterArray.length);
-        if (!usedFriends.includes(randomFriend)) {
-            masterArray[randomFriend].id_list.push(id);
-            masterArray[myId].id_list.push(masterArray[randomFriend].slack_id)
-        }
-        usedFriends.push(randomFriend);
-    }
-    // create random username
-    masterData.push({ "slack_id": id, "username": names[Math.floor(Math.random() * names.length)], "profile_picture": images[Math.floor(Math.random() * images.length)] });
-}
-export function gen() {
-    // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
-    if (websiteMode) {
-        masterArray = foobar1();
-        masterData = foobar3();
-    }
-    // DERIVE IDS, CONNECTIONS FROM MASTER
-    maxPos.set(2000 + masterArray.length * 8)
-    for (let i = 0; i < masterArray.length; i++) {
-        slackIds.push(masterArray[i].slack_id);
-        slackConnections.push(masterArray[i].id_list);
-    }
-    // Eleminate any ids in connections that don't exist
-    for (let i = 0; i < slackConnections.length; i++) {
-        let nodeConnections = slackConnections[i];
-        for (let j = nodeConnections.length - 1; j >= 0; j--) {
-            if (!slackIds.includes(nodeConnections[j]) || nodeConnections[j] == slackIds[i]) {
-                nodeConnections.splice(j, 1);
-            }
-        }
-        slackConnections[i] = nodeConnections;
-        // Create randomly generated strengths for each connection
-        let randomStrengths = [];
-        for (let x = 0; x < nodeConnections.length; x++) {
-            randomStrengths.push(Math.ceil(Math.random() * 100));
-        }
-        slackConnectionStrengths.push(randomStrengths)
-        // constructor(slackId, connections, id, connectionStrength)
-        //nodes.push(new Node(slackIds[i], slackConnections[i], i, slackConnectionStrengths[i]))
-        nodes.update(arr => [...arr, new Node(slackIds[i], slackConnections[i], i, slackConnectionStrengths[i])])
-    }
-    // generate connections for each node (visual)
-    for (let i = 0; i < nodes.length; i++) {
-        nodes[i].generateConnections()
-    }
-    mapLoaded = true;
 }
 
 export { Vector2, Node, Connection, Shell }
