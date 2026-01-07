@@ -74,6 +74,11 @@ export function setMaxPos(i) {
     maxPos = i;
 }
 
+export let zoomToKing = false; // when new focus put camera there
+export function setZoomToKing(bool) {
+    zoomToKing = bool
+}
+
 class Vector2 {
     constructor(x, y) {
         this.x = x;
@@ -382,6 +387,11 @@ export function posX(x) {
 }
 export function posY(y) {
     return (y - cameraY) * cameraZoom + centerY;
+}
+
+export function reset() {
+    setKing(null);
+    zoomToKing = false;
 }
 
 export { Vector2, Node, Connection, Shell }

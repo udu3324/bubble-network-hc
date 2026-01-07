@@ -1,6 +1,10 @@
+<script>
+    import { reset } from "$lib/visualizer";
+
+</script>
 <div class="bg-slate-900 mt-3 h-10 rounded-lg flex space-x-2">
     <button class="bg-green-600"><i class="fa-solid fa-floppy-disk"></i></button>
-    <button class="bg-blue-600" id="resetBtn"><i class="fa-solid fa-arrows-rotate"></i></button>
+    <button class="bg-blue-600" on:click={reset}><i class="fa-solid fa-arrows-rotate"></i></button>
 </div>
 
 <style lang="postcss">

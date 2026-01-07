@@ -34,7 +34,13 @@
         kingCircle,
         resetKingCircle,
         pushKingCircle,
-        setKingCircle
+        setKingCircle,
+
+        setZoomToKing,
+
+        zoomToKing
+
+
     } from "$lib/visualizer";
     import { onMount } from "svelte";
 
@@ -229,8 +235,6 @@
 
         var kingShells = []; // shells to hold the nodes
 
-        var zoomToKing = false; // when new focus put camera there
-
         // shell constants
         const _shellInitCount = 3;
         const _shellInitRadius = 200;
@@ -268,7 +272,7 @@
             //cameraZoom = Math.sin(tick) + 1;
 
             if (panOriginX != null) {
-                zoomToKing = false;
+                setZoomToKing(false)
                 if (prevCamX == null) {
                     prevCamX = cameraX;
                     prevCamY = cameraY;
@@ -313,7 +317,7 @@
             if (king != prevKing) {
                 prevKing = king;
                 if (king != null) {
-                    zoomToKing = true;
+                    setZoomToKing(true)
                     assembleKing();
                 }
             }
@@ -435,11 +439,6 @@
             }
         }
 
-        function reset() {
-            setKing(null);
-            zoomToKing = false;
-        }
-
         // might be better to render shapes at center of shape instead of corner as well
 
         var userScroll = 0;
@@ -450,12 +449,12 @@
         var scrolling = false;
         canvas.addEventListener("wheel", function (e) {
             e.preventDefault();
-            zoomToKing = false;
+            setZoomToKing(false)
             if (scrolling == false) {
                 scrolling = true;
                 cX = mouseX;
                 cY = mouseY;
-                //zoomToKing = false;
+                //setZoomToKing(false)
             }
             if (event.deltaY > 0) {
                 // zoom out
@@ -481,7 +480,7 @@
                 panX = e.clientX - mOffsetX;
                 panY = e.clientY;
 
-                zoomToKing = false;
+                setZoomToKing(false)
 
                 setMouseDown(false);
 
@@ -495,7 +494,7 @@
                 panX = e.clientX - mOffsetX;
                 panY = e.clientY - mOffsetY;
 
-                zoomToKing = false;
+                setZoomToKing(false)
             }
             setMouseX(e.clientX - mOffsetX);
             setMouseY(e.clientY - mOffsetY);
@@ -510,11 +509,7 @@
                setMouseDown(false);
             }
         });
-        let resetBtn = document.getElementById("resetBtn");
-        resetBtn.addEventListener("click", function() {
-            reset();
-        })
-
+        
         function loop() {
             tick();
             requestAnimationFrame(loop);
