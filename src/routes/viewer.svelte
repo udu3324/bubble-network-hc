@@ -1,58 +1,88 @@
 <script>
-    import { cameraX, cameraY, cameraZoom, centerX, centerY, Connection, ctx, king, masterData, maxPos, mouseX, mouseY, Node, nodes, posX, posY, setCameraX, setCameraY, setCameraZoom, setCanvas, setKing, setMouseX, setMouseY, setTaken, Shell, slackIds, taken, Vector2 } from "$lib/visualizer";
+    import {
+        cameraX,
+        cameraY,
+        cameraZoom,
+        centerX,
+        centerY,
+        Connection,
+        ctx,
+        king,
+        masterData,
+        maxPos,
+        mouseX,
+        mouseY,
+        mouseDown,
+        Node,
+        nodes,
+        posX,
+        posY,
+        setCameraX,
+        setCameraY,
+        setCameraZoom,
+        setCanvas,
+        setKing,
+        setMouseX,
+        setMouseY,
+        setMouseDown,
+        setTaken,
+        Shell,
+        slackIds,
+        taken,
+        Vector2,
+        setMaxPos,
+        kingCircle,
+        resetKingCircle,
+        pushKingCircle,
+        setKingCircle
+    } from "$lib/visualizer";
     import { onMount } from "svelte";
-    
-    let divis
-    let canvas
-    let canvasWidth = 0
-    let canvasHeight = 0
 
-    let innerScreenWidth = 0
-    let innerScreenHeight = 0
+    let divis;
+    let canvas;
+    let canvasWidth = 0;
+    let canvasHeight = 0;
 
-    let reactiveReady = false
+    let innerScreenWidth = 0;
+    let innerScreenHeight = 0;
+
+    // other stuff rowan did while drunk
+    var panOriginX = null;
+    var panOriginY = null;
+    var panX = 0;
+    var panY = 0;
+
+
+    let reactiveReady = false;
     $: {
         if ((innerScreenWidth || innerScreenHeight) && reactiveReady) {
-            canvasWidth = divis.getBoundingClientRect().width
-            canvasHeight = divis.getBoundingClientRect().height
+            canvasWidth = divis.getBoundingClientRect().width;
+            canvasHeight = divis.getBoundingClientRect().height;
         }
     }
 
     onMount(() => {
-        canvasWidth = divis.getBoundingClientRect().width
-        canvasHeight = divis.getBoundingClientRect().height
+        canvasWidth = divis.getBoundingClientRect().width;
+        canvasHeight = divis.getBoundingClientRect().height;
 
-        reactiveReady = true
-        
-        console.log(canvasWidth, canvasHeight)
+        reactiveReady = true;
+
+        console.log(canvasWidth, canvasHeight);
 
         function focusUser(slackId) {
-            setKing(slackIds.indexOf(slackId))
+            setKing(slackIds.indexOf(slackId));
         }
 
         var mOffsetX = divis.getBoundingClientRect().left;
         var mOffsetY = divis.getBoundingClientRect().top; //canvas.getBoundingClientRect().top
-        console.log(canvas.getBoundingClientRect())
-        console.log(divis.getBoundingClientRect())
+        console.log(canvas.getBoundingClientRect());
+        console.log(divis.getBoundingClientRect());
 
         const websiteMode = false; // turn on when using server data, off when using random data (need to call gen() function for website)
 
-        setCanvas(canvas)
-
-        
-
-        
+        setCanvas(canvas, canvasWidth, canvasHeight);
 
         var inputZoom = 12; // relative to 10
-
-
-        
-
-        
-
-        
-
-
 
         var mapLoaded = false;
 
@@ -60,43 +90,61 @@
         var prevCamY = null;
 
         // random names and images for testing
-        var names = ["Amigo", "Friend", "Lonely", "Hacker"]
+        var names = ["Amigo", "Friend", "Lonely", "Hacker"];
         var images = []; // contains urls
-        images.push("https://images.pexels.com/photos/33713697/pexels-photo-33713697.jpeg");
-        images.push("https://images.pexels.com/photos/35175266/pexels-photo-35175266.jpeg")
-        images.push("https://images.pexels.com/photos/19829670/pexels-photo-19829670.jpeg");
-        images.push("https://images.pexels.com/photos/35201958/pexels-photo-35201958.jpeg");
-        images.push("https://images.pexels.com/photos/35109039/pexels-photo-35109039.jpeg");
+        images.push(
+            "https://images.pexels.com/photos/33713697/pexels-photo-33713697.jpeg",
+        );
+        images.push(
+            "https://images.pexels.com/photos/35175266/pexels-photo-35175266.jpeg",
+        );
+        images.push(
+            "https://images.pexels.com/photos/19829670/pexels-photo-19829670.jpeg",
+        );
+        images.push(
+            "https://images.pexels.com/photos/35201958/pexels-photo-35201958.jpeg",
+        );
+        images.push(
+            "https://images.pexels.com/photos/35109039/pexels-photo-35109039.jpeg",
+        );
 
         let masterArray = [];
 
-        
-
         // HANDLE SLACK DATA
-        
-        
+
         var slackConnections = [];
         var slackConnectionStrengths = []; // randomly generated
 
         function randomSlackUser() {
             let id = Math.random() + "";
-            masterArray.push({ "slack_id": id, "id_list": [], "id_list_special": null });
+            masterArray.push({
+                slack_id: id,
+                id_list: [],
+                id_list_special: null,
+            });
             let myId = masterArray.length - 1;
             let usedFriends = [];
             for (let i = 0; i < 20; i++) {
-                let randomFriend = Math.floor(Math.random() * masterArray.length);
+                let randomFriend = Math.floor(
+                    Math.random() * masterArray.length,
+                );
 
                 if (!usedFriends.includes(randomFriend)) {
                     masterArray[randomFriend].id_list.push(id);
-                    masterArray[myId].id_list.push(masterArray[randomFriend].slack_id)
+                    masterArray[myId].id_list.push(
+                        masterArray[randomFriend].slack_id,
+                    );
                 }
                 usedFriends.push(randomFriend);
             }
             // create random username
 
-            masterData.push({ "slack_id": id, "username": names[Math.floor(Math.random() * names.length)], "profile_picture": images[Math.floor(Math.random() * images.length)] });
-
-
+            masterData.push({
+                slack_id: id,
+                username: names[Math.floor(Math.random() * names.length)],
+                profile_picture:
+                    images[Math.floor(Math.random() * images.length)],
+            });
         }
 
         // ADD TO WHERE THE REDUCE CONNECTIONS WHEN ZOOMED OUT INCREASES CUT WHEN THERES MORE CONNECTIONS AVG
@@ -107,16 +155,12 @@
             gen();
         }
 
-
-
-
         // OVERRIDE RANDOMNESS BY CALLING FOOBAR FUNCTIONS
 
         /*
         masterArray = foobar1();
         masterData = foobar3();
         */
-
 
         function gen() {
             // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
@@ -126,22 +170,21 @@
                 //setMasterData(foobar3())
             }
 
-
-
-
             // DERIVE IDS, CONNECTIONS FROM MASTER
-            maxPos.set(2000 + masterArray.length * 8)
+            setMaxPos(2000 + masterArray.length * 8);
             for (let i = 0; i < masterArray.length; i++) {
                 slackIds.push(masterArray[i].slack_id);
                 slackConnections.push(masterArray[i].id_list);
             }
 
-
             // Eleminate any ids in connections that don't exist
             for (let i = 0; i < slackConnections.length; i++) {
                 let nodeConnections = slackConnections[i];
                 for (let j = nodeConnections.length - 1; j >= 0; j--) {
-                    if (!slackIds.includes(nodeConnections[j]) || nodeConnections[j] == slackIds[i]) {
+                    if (
+                        !slackIds.includes(nodeConnections[j]) ||
+                        nodeConnections[j] == slackIds[i]
+                    ) {
                         nodeConnections.splice(j, 1);
                     }
                 }
@@ -153,40 +196,34 @@
                 for (let x = 0; x < nodeConnections.length; x++) {
                     randomStrengths.push(Math.ceil(Math.random() * 100));
                 }
-                slackConnectionStrengths.push(randomStrengths)
-
+                slackConnectionStrengths.push(randomStrengths);
 
                 // constructor(slackId, connections, id, connectionStrength)
-                nodes.push(new Node(slackIds[i], slackConnections[i], i, slackConnectionStrengths[i]))
+                nodes.push(
+                    new Node(
+                        slackIds[i],
+                        slackConnections[i],
+                        i,
+                        slackConnectionStrengths[i],
+                    ),
+                );
             }
-
 
             // generate connections for each node (visual)
             for (let i = 0; i < nodes.length; i++) {
-                nodes[i].generateConnections()
+                nodes[i].generateConnections();
             }
-
 
             mapLoaded = true;
         }
-
-
-
-
-
-
-
 
         // for smoothness
         var targetX = 0;
         var targetY = 0;
         var cameraEase = 10;
 
-        
-
         // KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
-        
-        var kingCircle = []; // people related to the king (ids)
+
         var kingStrengths = [];
         var prevKing = null;
 
@@ -198,38 +235,34 @@
         const _shellInitCount = 3;
         const _shellInitRadius = 200;
 
-
-
-
         var ticker = 0;
         function tick() {
             ticker += 0.2;
-            
 
             if (!mapLoaded) {
                 return;
             }
 
-
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "rgb(2, 31, 46)"
-            ctx.fillStyle = "##0f172b"
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
+            ctx.fillStyle = "rgb(2, 31, 46)";
+            ctx.fillStyle = "##0f172b";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.beginPath();
             ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI);
             ctx.stroke();
 
-
-            setCameraZoom(cameraZoom + ds)
+            setCameraZoom(cameraZoom + ds);
             ds *= df;
 
-            if (cameraZoom < 0.01) { // max zoom out
-                setCameraZoom(0.01)
+            if (cameraZoom < 0.01) {
+                // max zoom out
+                setCameraZoom(0.01);
                 ds = 0;
             }
-            if (cameraZoom > 10) { // max zoom in
-                setCameraZoom(10)
+            if (cameraZoom > 10) {
+                // max zoom in
+                setCameraZoom(10);
                 ds = 0;
             }
             //cameraZoom = Math.sin(tick) + 1;
@@ -242,13 +275,13 @@
                 }
                 //cameraX = prevCamX - (panX - panOriginX)/cameraZoom;
                 //cameraY = prevCamY - (panY - panOriginY)/cameraZoom;
-                targetX = (prevCamX - (panX - panOriginX) / cameraZoom);
-                targetY = (prevCamY - (panY - panOriginY) / cameraZoom)
+                targetX = prevCamX - (panX - panOriginX) / cameraZoom;
+                targetY = prevCamY - (panY - panOriginY) / cameraZoom;
                 let dx = targetX - cameraX;
                 let dy = targetY - cameraY;
 
-                setCameraX(cameraX + (dx / cameraEase))
-                setCameraY(cameraY + (dy / cameraEase))
+                setCameraX(cameraX + dx / cameraEase);
+                setCameraY(cameraY + dy / cameraEase);
             } else {
                 if (prevCamX != null) {
                     prevCamX = null;
@@ -257,19 +290,19 @@
                 let dx = targetX - cameraX;
                 let dy = targetY - cameraY;
 
-                setCameraX(cameraX + (dx / cameraEase))
-                setCameraY(cameraY + (dy / cameraEase))
+                setCameraX(cameraX + dx / cameraEase);
+                setCameraY(cameraY + dy / cameraEase);
                 prevCamX = cameraX;
                 prevCamY = cameraY;
             }
 
             if (zoomToKing) {
-                setCameraZoom(cameraZoom + ((0.2 - cameraZoom) / 30))
+                setCameraZoom(cameraZoom + (0.2 - cameraZoom) / 30);
                 let tX = nodes[king].pos.x;
                 let tY = nodes[king].pos.y;
 
-                setCameraX(cameraX + ((tX - cameraX) / 10))
-                setCameraY(cameraY + ((tY - cameraY) / 10))
+                setCameraX(cameraX + (tX - cameraX) / 10);
+                setCameraY(cameraY + (tY - cameraY) / 10);
                 targetX = cameraX;
                 targetY = cameraY;
             }
@@ -281,11 +314,12 @@
                 prevKing = king;
                 if (king != null) {
                     zoomToKing = true;
-                    assembleKing()
+                    assembleKing();
                 }
             }
 
-            if (king != null) { // display shells and bring closer to king
+            if (king != null) {
+                // display shells and bring closer to king
                 displayShells();
                 surroundNodes();
             }
@@ -294,10 +328,6 @@
 
             displayNodes();
 
-
-
-
-            mouseMoving = false;
         }
 
         function displayShells() {
@@ -309,19 +339,16 @@
 
         function surroundNodes() {
             for (let i = 0; i < kingCircle.length; i++) {
-                nodes[kingCircle[i]].approachShell()
+                nodes[kingCircle[i]].approachShell();
             }
         }
 
-
-        
-
         function displayNodes() {
             //alert("h")
-            setTaken(null)
+            setTaken(null);
             let circle = null;
             if (king != null) {
-                setTaken(king)
+                setTaken(king);
             }
             for (let i = 0; i < nodes.length; i++) {
                 nodes[i].touch();
@@ -334,7 +361,7 @@
             }
             for (let i = 0; i < nodes.length; i++) {
                 let temp = nodes[i];
-                temp.display()
+                temp.display();
             }
 
             if (circle != null) {
@@ -344,8 +371,9 @@
 
         function assembleKing() {
             // king circle = connections to the king
-            var kingNode = nodes[king]
-            kingCircle = kingNode.connectionIds;
+            var kingNode = nodes[king];
+            //kingCircle = kingNode.connectionIds;
+            setKingCircle(kingNode.connectionIds);
             kingStrengths = kingNode.connectionStrength;
 
             // sort the powers array while keeping kingCircle array in same order
@@ -365,14 +393,13 @@
             }
             // CREATE THE SHELLS
 
-
             // find needed # of shells
             kingShells = [];
             let numShells = 0;
             let slotsNeeded = kingCircle.length;
             while (true) {
                 numShells++;
-                slotsNeeded -= (numShells) * _shellInitCount;
+                slotsNeeded -= numShells * _shellInitCount;
                 if (slotsNeeded <= 0) {
                     break;
                 }
@@ -383,7 +410,14 @@
             let overallIndex = 0;
 
             for (let i = 0; i < numShells; i++) {
-                kingShells.push(new Shell(kingNode, i + 1, _shellInitRadius, _shellInitCount))
+                kingShells.push(
+                    new Shell(
+                        kingNode,
+                        i + 1,
+                        _shellInitRadius,
+                        _shellInitCount,
+                    ),
+                );
                 let currentShell = kingShells[i];
                 let nodesToAdd = (i + 1) * _shellInitCount;
                 let x = 0;
@@ -391,36 +425,29 @@
                     if (x + overallIndex >= kingCircle.length) {
                         break; // will also be end of overall for loop
                     }
-                    let currentNode = nodes[kingCircle[x + overallIndex]]
+                    let currentNode = nodes[kingCircle[x + overallIndex]];
                     currentShell.children.push(currentNode);
                     currentNode.assignShell(currentShell);
-
-
                 }
                 overallIndex += x;
 
                 currentShell.createAngles();
-
             }
-
-
         }
 
-
         function reset() {
-            setKing(null)
+            setKing(null);
             zoomToKing = false;
         }
 
         // might be better to render shapes at center of shape instead of corner as well
-
 
         var userScroll = 0;
         var ds = 0; // velocity of scroll
         var df = 0.8; // friction for smoothness
         var cX = 0;
         var cY = 0;
-        var scrolling = false
+        var scrolling = false;
         canvas.addEventListener("wheel", function (e) {
             e.preventDefault();
             zoomToKing = false;
@@ -430,48 +457,39 @@
                 cY = mouseY;
                 //zoomToKing = false;
             }
-            if (event.deltaY > 0) { // zoom out
+            if (event.deltaY > 0) {
+                // zoom out
                 //cameraZoom -= cameraZoom/10;
                 ds = 0 - cameraZoom / 10;
-            } else if (event.deltaY < 0) { // zoom in
+            } else if (event.deltaY < 0) {
+                // zoom in
                 //cameraZoom += cameraZoom/10;
                 ds = cameraZoom / 10;
             }
-
-
-
-
         });
-        canvas.addEventListener('contextmenu', event => event.preventDefault());
-        var panOriginX = null;
-        var panOriginY = null;
-        var panX = 0;
-        var panY = 0;
+        canvas.addEventListener("contextmenu", (event) =>
+            event.preventDefault(),
+        );
 
-        
-
-        var mouseDown = false;
-        var mouseMoving = false;
-
-        canvas.addEventListener('mousedown', function (e) {
-            if (e.button == 2) { // right click
+        canvas.addEventListener("mousedown", function (e) {
+            if (e.button == 2) {
+                // right click
                 if (panOriginX == null) {
                     panOriginX = e.clientX - mOffsetX;
-                    panOriginY = e.clientY- mOffsetY;
+                    panOriginY = e.clientY - mOffsetY;
                 }
                 panX = e.clientX - mOffsetX;
                 panY = e.clientY;
 
                 zoomToKing = false;
 
-                mouseDown = false;
+                setMouseDown(false);
 
                 document.body.style.cursor = "grab";
             } else {
-                mouseDown = true;
+                setMouseDown(true);
             }
-
-        })
+        });
         document.addEventListener("mousemove", function (e) {
             if (panOriginX != null) {
                 panX = e.clientX - mOffsetX;
@@ -479,20 +497,22 @@
 
                 zoomToKing = false;
             }
-            setMouseX(e.clientX - mOffsetX)
-            setMouseY(e.clientY - mOffsetY)
+            setMouseX(e.clientX - mOffsetX);
+            setMouseY(e.clientY - mOffsetY);
 
-            mouseMoving = true;
-        })
-        document.addEventListener('mouseup', function (e) {
-            if (e.button == 2) { // right click
+        });
+        document.addEventListener("mouseup", function (e) {
+            if (e.button == 2) {
+                // right click
                 panOriginX = null;
                 document.body.style.cursor = "auto";
             } else {
-                mouseDown = false;
+               setMouseDown(false);
             }
-
-
+        });
+        let resetBtn = document.getElementById("resetBtn");
+        resetBtn.addEventListener("click", function() {
+            reset();
         })
 
         function loop() {
@@ -500,14 +520,21 @@
             requestAnimationFrame(loop);
         }
         requestAnimationFrame(loop);
-    })    
+    });
 </script>
 
-<svelte:window bind:innerWidth={innerScreenWidth} bind:innerHeight={innerScreenHeight} />
+<svelte:window
+    bind:innerWidth={innerScreenWidth}
+    bind:innerHeight={innerScreenHeight}
+/>
 
-<div bind:this={divis} class="bg-slate-800 grow rounded-lg grid place-content-center">
+<div
+    bind:this={divis}
+    class="bg-slate-800 grow rounded-lg grid place-content-center"
+>
     <!--<span class="text-slate-600 font-bold text-5xl text-center">network visualizer here</span>-->
-    <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}></canvas>
+    <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}
+    ></canvas>
 </div>
 
 <style lang="postcss">

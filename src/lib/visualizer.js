@@ -3,14 +3,32 @@ import { writable } from "svelte/store";
 export let centerX = 0
 export let centerY = 0
 
+export let mouseDown = false;
+export function setMouseDown(i) {
+    mouseDown = i;
+}
+
+export let kingCircle = [];
+export function pushKingCircle(i) {
+    kingCircle.push(i);
+}
+export function resetKingCircle(i) {
+    kingCircle = [];
+}
+export function setKingCircle(i){
+    kingCircle = i;
+}
+
 export var canvas
 export var ctx
-export function setCanvas(canv) {
+export function setCanvas(canv, width, height) {
     canvas = canv
     ctx = canvas.getContext('2d')
 
-    centerX = canvas.width / 2
-    centerY = canvas.height / 2
+    centerX = width / 2
+    centerY = height / 2
+
+    console.log(centerX)
 }
 
 // for hovering
@@ -51,7 +69,10 @@ export function setCameraZoom(i) {
     cameraZoom = i
 }
 
-export let maxPos = writable(4000)
+export let maxPos = 4000
+export function setMaxPos(i) {
+    maxPos = i;
+}
 
 class Vector2 {
     constructor(x, y) {
@@ -226,7 +247,7 @@ class Node { // id correlates to id in the list of peoples
                 this.touched = true;
             }
         }
-        if (king == null && this.touched && mouseDown && !mouseMoving) {
+        if (king == null && this.touched && mouseDown) {
             king = this.id;
         }
         this.circleTouched = false;
