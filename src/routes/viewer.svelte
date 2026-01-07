@@ -1,5 +1,5 @@
 <script>
-    import { cameraX, cameraY, cameraZoom, centerX, centerY, Connection, ctx, king, masterData, mouseX, mouseY, Node, nodes, posX, posY, setCameraX, setCameraY, setCameraZoom, setCanvas, setKing, setMouseX, setMouseY, setTaken, Shell, slackIds, taken, Vector2 } from "$lib/visualizer";
+    import { cameraX, cameraY, cameraZoom, centerX, centerY, Connection, ctx, king, masterData, maxPos, mouseX, mouseY, Node, nodes, posX, posY, setCameraX, setCameraY, setCameraZoom, setCanvas, setKing, setMouseX, setMouseY, setTaken, Shell, slackIds, taken, Vector2 } from "$lib/visualizer";
     import { onMount } from "svelte";
     
     let divis
@@ -118,9 +118,6 @@
         */
 
 
-        var maxPos = 4000;
-
-
         function gen() {
             // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
             if (websiteMode) {
@@ -133,7 +130,7 @@
 
 
             // DERIVE IDS, CONNECTIONS FROM MASTER
-            maxPos = 2000 + masterArray.length * 8
+            maxPos.set(2000 + masterArray.length * 8)
             for (let i = 0; i < masterArray.length; i++) {
                 slackIds.push(masterArray[i].slack_id);
                 slackConnections.push(masterArray[i].id_list);
