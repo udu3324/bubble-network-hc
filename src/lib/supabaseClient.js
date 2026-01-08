@@ -11,8 +11,7 @@ export async function foobar1() {
     const { data, error } = await supabase
         .from('network')
         .select()
-    
-    return data
+    return data;
 }
 
 export async function foobar3() {

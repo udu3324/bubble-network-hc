@@ -9,6 +9,7 @@
         ctx,
         king,
         masterData,
+        setMasterData,
         maxPos,
         mouseX,
         mouseY,
@@ -35,14 +36,14 @@
         resetKingCircle,
         pushKingCircle,
         setKingCircle,
-
         setZoomToKing,
-
-        zoomToKing
-
-
+        zoomToKing,
+        dataSlackIds,
+        dataIndexes,
     } from "$lib/visualizer";
     import { onMount } from "svelte";
+
+    import { foobar1, foobar3 } from "../lib/supabaseClient";
 
     let divis;
     let canvas;
@@ -57,7 +58,6 @@
     var panOriginY = null;
     var panX = 0;
     var panY = 0;
-
 
     let reactiveReady = false;
     $: {
@@ -84,7 +84,7 @@
         console.log(canvas.getBoundingClientRect());
         console.log(divis.getBoundingClientRect());
 
-        const websiteMode = false; // turn on when using server data, off when using random data (need to call gen() function for website)
+        const websiteMode = true; // turn on when using server data, off when using random data (need to call gen() function for website)
 
         setCanvas(canvas, canvasWidth, canvasHeight);
 
@@ -159,6 +159,8 @@
                 randomSlackUser();
             }
             gen();
+        } else {
+            gen();
         }
 
         // OVERRIDE RANDOMNESS BY CALLING FOOBAR FUNCTIONS
@@ -168,20 +170,58 @@
         masterData = foobar3();
         */
 
-        function gen() {
-            // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
-            if (websiteMode) {
-                //masterArray = foobar1();
-                //masterData = foobar3();
-                //setMasterData(foobar3())
+        function doItBetter() {
+            // iterate throught he data to createa a general list of slack ids to resort back to
+            // then, get connections through the master array (slack ids will be aligned with the data)
+            // finally, create the slackconnections array
+
+            // step 1
+            for (let i = 0; i < masterData.length; i++) {
+                slackIds.push(masterData[i].slack_id);
+                slackConnections.push([]);
             }
 
-            // DERIVE IDS, CONNECTIONS FROM MASTER
-            setMaxPos(2000 + masterArray.length * 8);
+            // step 2 + step 3?
+
             for (let i = 0; i < masterArray.length; i++) {
-                slackIds.push(masterArray[i].slack_id);
-                slackConnections.push(masterArray[i].id_list);
+                // assuming not the entire map of slack, a few people, derive connections
+                let masterNode = masterArray[i];
+                let masterSlackId = masterNode.slack_id;
+                let masterConnections = masterNode.id_list;
+
+                for (let x = 0; x < masterConnections.length; x++) {
+                    // update connection for the other person
+                    let target = slackIds.indexOf(masterConnections[x]);
+                    if (target > -1) {
+                        //console.log(slackConnections.length + " -> " + target);
+                        if (!slackConnections[target].includes(masterSlackId)) {
+                            slackConnections[target].push(masterSlackId);
+                        }
+                    }
+
+                    // update connection for the master man
+                    slackConnections[slackIds.indexOf(masterSlackId)] = masterConnections;
+                }
             }
+
+            //console.log(slackConnections);
+        }
+
+        async function gen() {
+            // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
+            if (websiteMode) {
+                masterArray = await foobar1();
+                //alert(masterArray)
+                setMasterData(await foobar3());
+                //alert(masterData.length)
+            }
+
+            //compileData();
+            //doEverythingICant();
+            doItBetter();
+            //return;
+            // DERIVE IDS, CONNECTIONS FROM MASTER
+            setMaxPos(2000 + slackIds.length * 8);
 
             // Eleminate any ids in connections that don't exist
             for (let i = 0; i < slackConnections.length; i++) {
@@ -272,7 +312,7 @@
             //cameraZoom = Math.sin(tick) + 1;
 
             if (panOriginX != null) {
-                setZoomToKing(false)
+                setZoomToKing(false);
                 if (prevCamX == null) {
                     prevCamX = cameraX;
                     prevCamY = cameraY;
@@ -317,7 +357,7 @@
             if (king != prevKing) {
                 prevKing = king;
                 if (king != null) {
-                    setZoomToKing(true)
+                    setZoomToKing(true);
                     assembleKing();
                 }
             }
@@ -331,7 +371,6 @@
             // display the nodes
 
             displayNodes();
-
         }
 
         function displayShells() {
@@ -449,7 +488,7 @@
         var scrolling = false;
         canvas.addEventListener("wheel", function (e) {
             e.preventDefault();
-            setZoomToKing(false)
+            setZoomToKing(false);
             if (scrolling == false) {
                 scrolling = true;
                 cX = mouseX;
@@ -466,7 +505,7 @@
                 ds = cameraZoom / 10;
             }
         });
-        canvas.addEventListener("contextmenu", (event) =>
+        document.addEventListener("contextmenu", (event) =>
             event.preventDefault(),
         );
 
@@ -480,7 +519,7 @@
                 panX = e.clientX - mOffsetX;
                 panY = e.clientY;
 
-                setZoomToKing(false)
+                setZoomToKing(false);
 
                 setMouseDown(false);
 
@@ -494,11 +533,10 @@
                 panX = e.clientX - mOffsetX;
                 panY = e.clientY - mOffsetY;
 
-                setZoomToKing(false)
+                setZoomToKing(false);
             }
             setMouseX(e.clientX - mOffsetX);
             setMouseY(e.clientY - mOffsetY);
-
         });
         document.addEventListener("mouseup", function (e) {
             if (e.button == 2) {
@@ -506,10 +544,10 @@
                 panOriginX = null;
                 document.body.style.cursor = "auto";
             } else {
-               setMouseDown(false);
+                setMouseDown(false);
             }
         });
-        
+
         function loop() {
             tick();
             requestAnimationFrame(loop);

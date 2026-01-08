@@ -1,4 +1,5 @@
 import { writable } from "svelte/store";
+import { foobar1, foobar3 } from "./supabaseClient";
 
 export let centerX = 0
 export let centerY = 0
@@ -15,9 +16,11 @@ export function pushKingCircle(i) {
 export function resetKingCircle(i) {
     kingCircle = [];
 }
-export function setKingCircle(i){
+export function setKingCircle(i) {
     kingCircle = i;
 }
+
+
 
 export var canvas
 export var ctx
@@ -30,6 +33,9 @@ export function setCanvas(canv, width, height) {
 
     console.log(centerX)
 }
+
+export let dataSlackIds = [];
+export let dataIndexes = [];
 
 // for hovering
 export let taken = null; // will be set to id of node getting touched innapropriately
@@ -48,6 +54,9 @@ export function setMouseY(i) {
 
 export let nodes = []; // one node for every user
 export let masterData = []; // {slackid, username, profile} username = display name
+export function setMasterData(i) {
+    masterData = i;
+}
 export let slackIds = [];
 
 export let king = null
@@ -124,7 +133,15 @@ class Node { // id correlates to id in the list of peoples
         this.fade = 1; // smoothnessss
         this.lineNatural = 0.15;
         this.lineFade = this.lineNatural;
-        this.displayName = masterData[this.id].username;
+
+        this.dataId = this.id;
+        //console.log(masterData[this.dataId].username);
+        try {
+            this.displayName = masterData[this.dataId].username;
+        } catch (error) {
+            this.displayName = this.user
+            this.failed = true;
+        }
         this.img = null; // only load it once
         this.imgReady = false;
     }
@@ -231,7 +248,8 @@ class Node { // id correlates to id in the list of peoples
         return false;
     }
     inZoom() { // zooming out prioritizes nodes w/ larger connections
-        return Math.pow(this.connectionLines.length, 2) > 150 / cameraZoom
+        let visibility = 0;
+        return Math.pow(this.connectionLines.length, 2) > Math.pow(visibility, 2) / cameraZoom
     }
     showName() {
         // Show username
@@ -280,6 +298,17 @@ class Node { // id correlates to id in the list of peoples
         this.pos.y += (targetY - this.pos.y) / speed;
     }
     drawInfoBox() {
+        if (this.failed) {
+            ctx.fillStyle = "white"
+            ctx.font = "8px monospace"
+            ctx.fillStyle = "rgb(10,16,26)"
+            ctx.globalAlpha = 0.5;
+            ctx.roundRect(mouseX + offset, mouseY - 100 - offset, nameplateWidth, 100, 5);
+            ctx.fill()
+            ctx.globalAlpha = 1.0;
+            ctx.fillText(this.displayName, mouseX + offset + 10, mouseY - offset - 45)
+            return;
+        }
         // image handling
         if (this.img == null) { // need to load the image
             this.img = new Image();
