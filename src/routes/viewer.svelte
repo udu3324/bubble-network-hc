@@ -563,7 +563,7 @@
 
 <div
     bind:this={divis}
-    class="bg-slate-800 grow rounded-lg grid place-content-center"
+    class="bg-slate-800 grow rounded-lg grid place-content-center overflow-clip"
 >
     <!--<span class="text-slate-600 font-bold text-5xl text-center">network visualizer here</span>-->
     <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}
