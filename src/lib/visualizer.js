@@ -31,7 +31,7 @@ export function setCanvas(canv, width, height) {
     centerX = width / 2
     centerY = height / 2
 
-    console.log(centerX)
+    //console.log(centerX)
 }
 
 export let dataSlackIds = [];

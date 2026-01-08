@@ -73,7 +73,7 @@
 
         reactiveReady = true;
 
-        console.log(canvasWidth, canvasHeight);
+        //console.log(canvasWidth, canvasHeight);
 
         function focusUser(slackId) {
             setKing(slackIds.indexOf(slackId));
@@ -81,8 +81,8 @@
 
         var mOffsetX = divis.getBoundingClientRect().left;
         var mOffsetY = divis.getBoundingClientRect().top; //canvas.getBoundingClientRect().top
-        console.log(canvas.getBoundingClientRect());
-        console.log(divis.getBoundingClientRect());
+        //console.log(canvas.getBoundingClientRect());
+        //console.log(divis.getBoundingClientRect());
 
         const websiteMode = true; // turn on when using server data, off when using random data (need to call gen() function for website)
 
