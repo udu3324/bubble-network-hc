@@ -47,6 +47,8 @@
         setCenters,
 
         reset,
+        resetMode,
+        setResetMode,
 
         clearData,
 
@@ -398,12 +400,20 @@
             }
 
             if (zoomToKing) {
+                setResetMode(false);
                 setCameraZoom(cameraZoom + (0.2 - cameraZoom) / 30);
                 let tX = nodes[king].pos.x;
                 let tY = nodes[king].pos.y;
 
                 setCameraX(cameraX + (tX - cameraX) / 10);
                 setCameraY(cameraY + (tY - cameraY) / 10);
+                targetX = cameraX;
+                targetY = cameraY;
+            }
+
+            if (resetMode) {
+                setCameraZoom(cameraZoom + (0.05 - cameraZoom) / 30);
+                
                 targetX = cameraX;
                 targetY = cameraY;
             }
@@ -559,6 +569,7 @@
         canvas.addEventListener("wheel", function (e) {
             e.preventDefault();
             setZoomToKing(false);
+            setResetMode(false);
             if (scrolling == false) {
                 scrolling = true;
                 cX = mouseX;
@@ -597,6 +608,8 @@
 
                 setMouseDown(false);
 
+                setResetMode(false);
+
                 document.body.style.cursor = "grab";
                 
             }
@@ -607,6 +620,7 @@
                 panY = e.clientY - mOffsetY;
 
                 setZoomToKing(false);
+                setResetMode(false);
             }
             setMouseX(e.clientX - mOffsetX);
             setMouseY(e.clientY - mOffsetY);

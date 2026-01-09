@@ -30,6 +30,11 @@ export function setKingMode(i) {
     kingModeW.set(i);
 }
 
+export let resetMode = false;
+export function setResetMode(i) {
+    resetMode = i;
+}
+
 
 
 export var canvas
@@ -107,6 +112,21 @@ export function setZoomToKing(bool) {
 export let kingModeW = writable(false)
 export let zoomedToKing = writable(false)
 
+function randomColor() {
+    let total = 0;
+    while (true) {
+        let r = Math.random() * 255;
+        let g = Math.random() * 255;
+        let b = Math.random() * 255;
+        total = r + g + b; // target >= 150-200
+        if (total >= 150) {
+            return "rgb(" + r + "," + g + "," + b + ")";
+        }
+    }
+
+
+}
+
 class Vector2 {
     constructor(x, y) {
         this.x = x;
@@ -145,7 +165,7 @@ class Node { // id correlates to id in the list of peoples
         }
         this.startX = this.pos.x;
         this.startY = this.pos.y;
-        this.color = "rgb(" + Math.random() * 200 + 55 + "," + Math.random() * 200 + 55 + "," + Math.random() * 200 + 55 + ")"; // random color
+        this.color = randomColor(); // random color
         this.touched = false;
         this.circleTouched = false; // is in kingcircle and is hovered over (king included)
         this.connectionLines = [];
@@ -277,7 +297,7 @@ class Node { // id correlates to id in the list of peoples
         }
         // Show username
         let size = this.displayName.length;
-        let fontSize = 60/(1+Math.min(Math.pow(this.displayName.length/10,2)/20, 3));
+        let fontSize = 60 / (1 + Math.min(Math.pow(this.displayName.length / 10, 2) / 20, 3));
         ctx.font = cameraZoom * fontSize + "px monospace";
         ctx.fillStyle = "white"
         ctx.fillText(this.displayName, posX(this.pos.x - size * fontSize / 3), posY(this.pos.y + this.rad * 2))
@@ -453,6 +473,7 @@ export function reset() {
     setKingMode(false);
     zoomToKing = false;
     zoomedToKing.set(zoomToKing)
+    setResetMode(true);
 }
 
 export function clearData() {
