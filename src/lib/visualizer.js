@@ -26,7 +26,7 @@ export function setKingCircle(i) {
 
 export let kingMode = false;
 export function setKingMode(i) {
-    kingMode=i;
+    kingMode = i;
     kingModeW.set(i);
 }
 

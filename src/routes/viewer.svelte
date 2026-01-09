@@ -44,7 +44,10 @@
         setKingMode,
         kingModeW,
 
-        setCenters
+        setCenters,
+
+        reset
+
 
     } from "$lib/visualizer";
     import { onMount } from "svelte";
@@ -546,6 +549,9 @@
         canvas.addEventListener("mousedown", function (e) {
             if (e.button == 2) {
                 setMouseDown(true);
+                if (king && kingModeW) {
+                    reset()
+                }
             } else {
                 // right click
                 if (panOriginX == null) {
