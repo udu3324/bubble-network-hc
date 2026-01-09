@@ -82,8 +82,8 @@
     let mOffsetX = 0
     let mOffsetY = 0
 
-    let innerScreenWidth = 0;
-    let innerScreenHeight = 0;
+    let innerScreenWidth = 0
+    let innerScreenHeight = 0
 
     let infoUsername = ""
     let infoSlackID = ""
