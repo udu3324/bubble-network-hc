@@ -50,7 +50,13 @@
 
         clearData,
 
-        slackConnections
+        slackConnections,
+
+        setMasterArray,
+
+        masterArray
+
+
 
 
 
@@ -60,6 +66,7 @@
 
     import { foobar1, foobar3 } from "../lib/supabaseClient";
     import { page } from "$app/stores";
+    import { infoPanelVisible } from "$lib";
 
     let divis;
     let canvas;
@@ -67,12 +74,20 @@
     let canvasHeight = 0;
 
     let hintsAreHidden = "hidden"
+    let infoIsHidden = "hidden"
+    let infoHiddenOverride = ""
 
     let mOffsetX = 0
     let mOffsetY = 0
 
     let innerScreenWidth = 0;
     let innerScreenHeight = 0;
+
+    let infoUsername = ""
+    let infoSlackID = ""
+    let infoConnections = ""
+    let infoRank = ""
+    let infoScanned = ""
 
     // other stuff rowan did while drunk
     var panOriginX = null;
@@ -141,7 +156,7 @@
             "https://images.pexels.com/photos/35109039/pexels-photo-35109039.jpeg",
         );
 
-        let masterArray = [];
+        
 
         // HANDLE SLACK DATA
         var slackConnectionStrengths = []; // randomly generated
@@ -194,6 +209,7 @@
         masterArray = foobar1();
         masterData = foobar3();
         */
+       
 
         function doItBetter() {
             // reset data
@@ -240,9 +256,9 @@
         async function gen() {
             // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
             if (websiteMode) {
-                masterArray = await foobar1();
+                setMasterArray(await foobar1())
                 //alert(masterArray)
-                setMasterData(await foobar3());
+                setMasterData(await foobar3())
                 //alert(masterData.length)
             }
 
@@ -618,6 +634,45 @@
 
         hintsAreHidden = "hidden"
     }
+
+    kingModeW.subscribe(zoomed => {
+        if (zoomed) {
+            //reset info
+            infoUsername = ""
+            infoSlackID = ""
+            infoConnections = ""
+            infoRank = ""
+            infoScanned = ""
+
+            let info = masterData.find(item => item.slack_id === slackIds[king])
+            let bubble = masterArray.find(item => item.slack_id === slackIds[king])
+            console.log("bubble is", bubble)
+            infoIsHidden = ""
+
+            infoUsername = info.username
+            infoSlackID = info.slack_id
+            if (bubble) {
+                infoConnections = bubble.id_list.length
+                infoRank = masterArray.findIndex(item => item.slack_id === slackIds[king]) + 1
+                infoScanned = "true"
+            } else {
+                infoScanned = "false"
+                infoRank = "n/a"
+                infoConnections = "n/a"
+            }
+            
+        } else {
+            infoIsHidden = "hidden"
+        }
+    })
+
+    infoPanelVisible.subscribe(bool => {
+        if (bool) {
+            infoHiddenOverride = ""
+        } else {
+            infoHiddenOverride = "hidden"
+        }
+    })
 </script>
 
 <svelte:window
@@ -641,14 +696,32 @@
     
     <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}></canvas>
 
-    <div class="{hintsAreHidden} absolute z-30 p-3 m-3 inset-0 w-56 h-36 bg-black/50 text-white pointer-events-none">
-        <h1 class="font-bold">control hint</h1>
+    <button on:click={hide} class="{hintsAreHidden} absolute z-30 p-3 m-3 right-0 bottom-0 bg-black/40 text-white cursor-pointer text-left">
+        <h1 class="font-bold">control hints</h1>
         <span>left click - pan</span>
         <i class="fa-solid fa-computer-mouse-button-left"></i>
         <br>
         <span>right click - toggle focus</span>
         <br>
-        <button on:click={hide} class="bg-black/70 hover:bg-gray-700 p-2 mt-2 cursor-pointer pointer-events-auto">hide forever</button>
+    </button>
+
+    <div class="{infoIsHidden} {infoHiddenOverride} absolute z-30 p-3 m-3 left-0 bottom-0 bg-black/40 text-white pointer-events-none">
+        <div class="grid grid-cols-[max-content_auto] gap-x-2 gap-y-1">
+            <span class="base">username: </span>
+            <span class="info">{infoUsername}</span>
+
+            <span class="base">slack id: </span>
+            <span class="info">{infoSlackID}</span>
+
+            <span class="base">connections: </span>
+            <span class="info">{infoConnections}</span>
+
+            <span class="base">rank: </span>
+            <span class="info">{infoRank}</span>
+
+            <span class="base">scanned: </span>
+            <span class="info">{infoScanned}</span>
+        </div>
     </div>
 </div>
 
@@ -660,5 +733,13 @@
         z-index: 10;
         width: 100%;
         height: 100%;
+    }
+
+    .base {
+        @apply  font-light text-right;
+    }
+
+    .info {
+        @apply text-base font-normal;
     }
 </style>

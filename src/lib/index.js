@@ -5,3 +5,5 @@ import { writable } from "svelte/store"
 export const isAuthed = writable(false)
 
 export const hasData = writable(false)
+
+export let infoPanelVisible = writable(true)

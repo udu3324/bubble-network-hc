@@ -12,7 +12,9 @@ export async function foobar1() {
         .from('network')
         .select()
 
-    return data
+    return data.sort((a, b) => 
+        b.id_list.length - a.id_list.length
+    )
 }
 
 export async function foobar3() {

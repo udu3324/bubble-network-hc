@@ -67,6 +67,11 @@ export let masterData = []; // {slackid, username, profile} username = display n
 export function setMasterData(i) {
     masterData = i;
 }
+export let masterArray = [];
+export function setMasterArray(i) {
+    masterArray = i;
+}
+
 export let slackIds = [];
 export let slackConnections = [];
 
@@ -321,7 +326,7 @@ class Node { // id correlates to id in the list of peoples
             ctx.font = "8px monospace"
             ctx.fillStyle = "rgb(10,16,26)"
             ctx.globalAlpha = 0.5;
-            ctx.roundRect(mouseX + offset, mouseY - 100 - offset, nameplateWidth, 100, 5);
+            ctx.rect(mouseX + offset, mouseY - 100 - offset, nameplateWidth, 100);
             ctx.fill()
             ctx.globalAlpha = 1.0;
             ctx.fillText(this.displayName, mouseX + offset + 10, mouseY - offset - 45)
@@ -351,7 +356,7 @@ class Node { // id correlates to id in the list of peoples
         ctx.font = "8px monospace"
         ctx.fillStyle = "rgb(10,16,26)"
         ctx.globalAlpha = 0.5;
-        ctx.roundRect(mouseX + offset, mouseY - 100 - offset, nameplateWidth, 100, 5);
+        ctx.rect(mouseX + offset, mouseY - 100 - offset, nameplateWidth, 100);
         ctx.fill()
         ctx.globalAlpha = 1.0;
         if (this.imgReady) { // draw image
