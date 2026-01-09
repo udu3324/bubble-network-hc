@@ -68,6 +68,7 @@ export function setMasterData(i) {
     masterData = i;
 }
 export let slackIds = [];
+export let slackConnections = [];
 
 export let king = null
 export function setKing(i) {
@@ -447,6 +448,11 @@ export function reset() {
     setKingMode(false);
     zoomToKing = false;
     zoomedToKing.set(zoomToKing)
+}
+
+export function clearData() {
+    slackIds = []
+    slackConnections = []
 }
 
 export { Vector2, Node, Connection, Shell }

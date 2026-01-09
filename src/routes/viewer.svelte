@@ -46,7 +46,13 @@
 
         setCenters,
 
-        reset
+        reset,
+
+        clearData,
+
+        slackConnections
+
+
 
 
     } from "$lib/visualizer";
@@ -59,6 +65,8 @@
     let canvas;
     let canvasWidth = 0;
     let canvasHeight = 0;
+
+    let hintsAreHidden = "hidden"
 
     let mOffsetX = 0
     let mOffsetY = 0
@@ -86,6 +94,11 @@
     }
 
     onMount(() => {
+
+        if (!localStorage.getItem("hintsHidden")) {
+            hintsAreHidden = ""
+        }
+
         canvasWidth = divis.getBoundingClientRect().width;
         canvasHeight = divis.getBoundingClientRect().height;
 
@@ -131,8 +144,6 @@
         let masterArray = [];
 
         // HANDLE SLACK DATA
-
-        var slackConnections = [];
         var slackConnectionStrengths = []; // randomly generated
 
         function randomSlackUser() {
@@ -185,6 +196,11 @@
         */
 
         function doItBetter() {
+            // reset data
+            
+            clearData()
+            reset()
+
             // iterate throught he data to createa a general list of slack ids to resort back to
             // then, get connections through the master array (slack ids will be aligned with the data)
             // finally, create the slackconnections array
@@ -277,9 +293,9 @@
             mapLoaded = true;
             //setKing(slackIds.indexOf("U07QLM85S7J")); // person who put in their thingy
         
-        
+            
             //check if there's an id query in url
-            let idQuery = $page.url.searchParams.get('id').trim()
+            let idQuery = $page.url.searchParams.get('id')
             if (idQuery) {
                 if (slackIds.includes(idQuery)) {
                     console.log("autofocus to", idQuery)
@@ -595,6 +611,13 @@
         }
         requestAnimationFrame(loop);
     });
+
+    function hide() {
+        console.log("hiding control hint panel")
+        localStorage.setItem('hintsHidden', 'yes')
+
+        hintsAreHidden = "hidden"
+    }
 </script>
 
 <svelte:window
@@ -604,17 +627,37 @@
 
 <div
     bind:this={divis}
-    class="bg-slate-800 grow rounded-lg grid place-content-center overflow-clip"
+    class="bg-slate-800 grow rounded-lg relative place-content-center overflow-clip"
 >
-    <!--<span class="text-slate-600 font-bold text-5xl text-center">network visualizer here</span>-->
-    <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}
-    ></canvas>
+    <div class="absolute inset-0 grid place-content-center text-center">
+        <!-- <span class="text-slate-600 font-bold text-5xl text-center">network visualizer here</span> -->
+        <span class="text-slate-600 font-bold text-5xl text-center">
+            loading network visualizer
+            <br>
+            <i class="fa-solid fa-spinner animate-spin text-9xl mt-5"></i>
+        </span>
+        
+    </div>
+    
+    <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}></canvas>
+
+    <div class="{hintsAreHidden} absolute z-30 p-3 m-3 inset-0 w-56 h-36 bg-black/50 text-white pointer-events-none">
+        <h1 class="font-bold">control hint</h1>
+        <span>left click - pan</span>
+        <i class="fa-solid fa-computer-mouse-button-left"></i>
+        <br>
+        <span>right click - toggle focus</span>
+        <br>
+        <button on:click={hide} class="bg-black/70 hover:bg-gray-700 p-2 mt-2 cursor-pointer pointer-events-auto">hide forever</button>
+    </div>
 </div>
 
 <style lang="postcss">
     @reference "tailwindcss";
 
     canvas {
+        @apply absolute inset-0 grid place-content-center;
+        z-index: 10;
         width: 100%;
         height: 100%;
     }
