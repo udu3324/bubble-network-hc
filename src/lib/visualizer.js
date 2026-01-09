@@ -3,6 +3,9 @@ import { foobar1, foobar3 } from "./supabaseClient";
 
 export let centerX = 0
 export let centerY = 0
+
+
+
 export function setCenters(x, y) {
     centerX = x
     centerY = y
@@ -126,6 +129,10 @@ function randomColor() {
 
 
 }
+
+export let mapLoaded = false;
+
+var slackConnectionStrengths = []; // randomly generated
 
 class Vector2 {
     constructor(x, y) {
@@ -269,11 +276,7 @@ class Node { // id correlates to id in the list of peoples
         // draw circle
         circ(this.pos.x, this.pos.y, this.rad, this.color);
         ctx.globalAlpha = 1;
-        // draw info box if im touched
-        this.touch();
-        if (this.circleTouched) {
-            //this.drawInfoBox();
-        }
+
     }
     inRange() {
         if (king == this.id) {
@@ -296,7 +299,7 @@ class Node { // id correlates to id in the list of peoples
         if ((document.body.style.cursor === "grab") && !kingMode) {
             return
         }
-        
+
         // Show username
         let size = this.displayName.length;
         let fontSize = 60 / (1 + Math.min(Math.pow(this.displayName.length / 10, 2) / 20, 3));
@@ -304,7 +307,7 @@ class Node { // id correlates to id in the list of peoples
         ctx.fillStyle = "white"
         ctx.fillText(this.displayName, posX(this.pos.x - size * fontSize / 3), posY(this.pos.y + this.rad * 2))
     }
-    touch() {
+    touch(mouseClickedNode) {
         let xp = posX(this.pos.x);
         let yp = posY(this.pos.y);
         this.touched = false;
@@ -315,7 +318,7 @@ class Node { // id correlates to id in the list of peoples
                 this.touched = true;
             }
         }
-        if (king == null && this.touched && mouseDown) {
+        if (king == null && this.touched && mouseDown || (this.touched && mouseClickedNode)) {
             king = this.id;
         }
         this.circleTouched = false;
@@ -482,6 +485,105 @@ export function clearData() {
     slackIds = []
     slackConnections = []
     nodes = []
+}
+
+export function doItBetter() {
+    // reset data
+
+    clearData();
+    reset();
+
+    // iterate throught he data to createa a general list of slack ids to resort back to
+    // then, get connections through the master array (slack ids will be aligned with the data)
+    // finally, create the slackconnections array
+
+    // step 1
+    for (let i = 0; i < masterData.length; i++) {
+        slackIds.push(masterData[i].slack_id);
+        slackConnections.push([]);
+    }
+
+    // step 2 + step 3?
+
+    for (let i = 0; i < masterArray.length; i++) {
+        // assuming not the entire map of slack, a few people, derive connections
+        let masterNode = masterArray[i];
+        let masterSlackId = masterNode.slack_id;
+        let masterConnections = masterNode.id_list;
+
+        for (let x = 0; x < masterConnections.length; x++) {
+            // update connection for the other person
+            let target = slackIds.indexOf(masterConnections[x]);
+            if (target > -1) {
+                //console.log(slackConnections.length + " -> " + target);
+                if (!slackConnections[target].includes(masterSlackId)) {
+                    slackConnections[target].push(masterSlackId);
+                }
+            }
+
+            // update connection for the master man
+            slackConnections[slackIds.indexOf(masterSlackId)] =
+                masterConnections;
+        }
+    }
+
+    //console.log(slackConnections);
+}
+
+
+export async function gen() {
+    // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
+    setMasterArray(await foobar1());
+    //alert(masterArray)
+    setMasterData(await foobar3());
+    //alert(masterData.length)
+
+    //compileData();
+    //doEverythingICant();
+    doItBetter();
+    //return;
+    // DERIVE IDS, CONNECTIONS FROM MASTER
+    setMaxPos(2000 + slackIds.length * 8);
+
+    // Eleminate any ids in connections that don't exist
+    for (let i = 0; i < slackConnections.length; i++) {
+        let nodeConnections = slackConnections[i];
+        for (let j = nodeConnections.length - 1; j >= 0; j--) {
+            if (
+                !slackIds.includes(nodeConnections[j]) ||
+                nodeConnections[j] == slackIds[i]
+            ) {
+                nodeConnections.splice(j, 1);
+            }
+        }
+        slackConnections[i] = nodeConnections;
+
+        // Create randomly generated strengths for each connection
+
+        let randomStrengths = [];
+        for (let x = 0; x < nodeConnections.length; x++) {
+            randomStrengths.push(Math.ceil(Math.random() * 100));
+        }
+        slackConnectionStrengths.push(randomStrengths);
+
+        // constructor(slackId, connections, id, connectionStrength)
+        nodes.push(
+            new Node(
+                slackIds[i],
+                slackConnections[i],
+                i,
+                slackConnectionStrengths[i],
+            ),
+        );
+    }
+
+    // generate connections for each node (visual)
+    for (let i = 0; i < nodes.length; i++) {
+        nodes[i].generateConnections();
+    }
+
+    mapLoaded = true;
+    //setKing(slackIds.indexOf("U07QLM85S7J")); // person who put in their thingy
 }
 
 export { Vector2, Node, Connection, Shell }

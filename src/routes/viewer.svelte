@@ -43,26 +43,17 @@
         kingMode,
         setKingMode,
         kingModeW,
-
         setCenters,
-
         reset,
         resetMode,
         setResetMode,
-
         clearData,
-
         slackConnections,
-
         setMasterArray,
-
-        masterArray
-
-
-
-
-
-
+        masterArray,
+        doItBetter,
+        gen,
+        mapLoaded
     } from "$lib/visualizer";
     import { onMount } from "svelte";
 
@@ -75,21 +66,24 @@
     let canvasWidth = 0;
     let canvasHeight = 0;
 
-    let hintsAreHidden = "hidden"
-    let infoIsHidden = "hidden"
-    let infoHiddenOverride = ""
+    let hintsAreHidden = "hidden";
+    let infoIsHidden = "hidden";
+    let infoHiddenOverride = "";
 
-    let mOffsetX = 0
-    let mOffsetY = 0
+    let mOffsetX = 0;
+    let mOffsetY = 0;
 
-    let innerScreenWidth = 0
-    let innerScreenHeight = 0
+    let mouseTimer = 0;
+    let mouseClickedNode = false;
 
-    let infoUsername = ""
-    let infoSlackID = ""
-    let infoConnections = ""
-    let infoRank = ""
-    let infoScanned = ""
+    let innerScreenWidth = 0;
+    let innerScreenHeight = 0;
+
+    let infoUsername = "";
+    let infoSlackID = "";
+    let infoConnections = "";
+    let infoRank = "";
+    let infoScanned = "";
 
     // other stuff rowan did while drunk
     var panOriginX = null;
@@ -106,14 +100,13 @@
             mOffsetX = divis.getBoundingClientRect().left;
             mOffsetY = divis.getBoundingClientRect().top;
 
-            setCenters(canvasWidth / 2, canvasHeight / 2)
+            setCenters(canvasWidth / 2, canvasHeight / 2);
         }
     }
 
     onMount(() => {
-
         if (!localStorage.getItem("hintsHidden")) {
-            hintsAreHidden = ""
+            hintsAreHidden = "";
         }
 
         canvasWidth = divis.getBoundingClientRect().width;
@@ -125,84 +118,29 @@
 
         mOffsetX = divis.getBoundingClientRect().left;
         mOffsetY = divis.getBoundingClientRect().top; //canvas.getBoundingClientRect().top
-        //console.log(canvas.getBoundingClientRect());
-        //console.log(divis.getBoundingClientRect());
-
-        const websiteMode = true; // turn on when using server data, off when using random data (need to call gen() function for website)
-
+        
         setCanvas(canvas, canvasWidth, canvasHeight);
 
         var inputZoom = 12; // relative to 10
 
-        var mapLoaded = false;
 
         var prevCamX = null;
         var prevCamY = null;
 
-        // random names and images for testing
-        var names = ["Amigo", "Friend", "Lonely", "Hacker"];
-        var images = []; // contains urls
-        images.push(
-            "https://images.pexels.com/photos/33713697/pexels-photo-33713697.jpeg",
-        );
-        images.push(
-            "https://images.pexels.com/photos/35175266/pexels-photo-35175266.jpeg",
-        );
-        images.push(
-            "https://images.pexels.com/photos/19829670/pexels-photo-19829670.jpeg",
-        );
-        images.push(
-            "https://images.pexels.com/photos/35201958/pexels-photo-35201958.jpeg",
-        );
-        images.push(
-            "https://images.pexels.com/photos/35109039/pexels-photo-35109039.jpeg",
-        );
-
+        // HANDLE SLACK DATA
         
 
-        // HANDLE SLACK DATA
-        var slackConnectionStrengths = []; // randomly generated
-
-        function randomSlackUser() {
-            let id = Math.random() + "";
-            masterArray.push({
-                slack_id: id,
-                id_list: [],
-                id_list_special: null,
-            });
-            let myId = masterArray.length - 1;
-            let usedFriends = [];
-            for (let i = 0; i < 20; i++) {
-                let randomFriend = Math.floor(
-                    Math.random() * masterArray.length,
-                );
-
-                if (!usedFriends.includes(randomFriend)) {
-                    masterArray[randomFriend].id_list.push(id);
-                    masterArray[myId].id_list.push(
-                        masterArray[randomFriend].slack_id,
-                    );
-                }
-                usedFriends.push(randomFriend);
-            }
-            // create random username
-
-            masterData.push({
-                slack_id: id,
-                username: names[Math.floor(Math.random() * names.length)],
-                profile_picture:
-                    images[Math.floor(Math.random() * images.length)],
-            });
-        }
 
         // ADD TO WHERE THE REDUCE CONNECTIONS WHEN ZOOMED OUT INCREASES CUT WHEN THERES MORE CONNECTIONS AVG
-        if (!websiteMode) {
-            for (let i = 0; i < 1000; i++) {
-                randomSlackUser();
+
+        gen();
+        //check if there's an id query in url
+        let idQuery = $page.url.searchParams.get("id");
+        if (idQuery) {
+            if (slackIds.includes(idQuery)) {
+                console.log("autofocus to", idQuery);
+                setKing(slackIds.indexOf(idQuery));
             }
-            gen();
-        } else {
-            gen();
         }
 
         // OVERRIDE RANDOMNESS BY CALLING FOOBAR FUNCTIONS
@@ -211,116 +149,10 @@
         masterArray = foobar1();
         masterData = foobar3();
         */
-       
 
-        function doItBetter() {
-            // reset data
-            
-            clearData()
-            reset()
-
-            // iterate throught he data to createa a general list of slack ids to resort back to
-            // then, get connections through the master array (slack ids will be aligned with the data)
-            // finally, create the slackconnections array
-
-            // step 1
-            for (let i = 0; i < masterData.length; i++) {
-                slackIds.push(masterData[i].slack_id);
-                slackConnections.push([]);
-            }
-
-            // step 2 + step 3?
-
-            for (let i = 0; i < masterArray.length; i++) {
-                // assuming not the entire map of slack, a few people, derive connections
-                let masterNode = masterArray[i];
-                let masterSlackId = masterNode.slack_id;
-                let masterConnections = masterNode.id_list;
-
-                for (let x = 0; x < masterConnections.length; x++) {
-                    // update connection for the other person
-                    let target = slackIds.indexOf(masterConnections[x]);
-                    if (target > -1) {
-                        //console.log(slackConnections.length + " -> " + target);
-                        if (!slackConnections[target].includes(masterSlackId)) {
-                            slackConnections[target].push(masterSlackId);
-                        }
-                    }
-
-                    // update connection for the master man
-                    slackConnections[slackIds.indexOf(masterSlackId)] = masterConnections;
-                }
-            }
-
-            //console.log(slackConnections);
-        }
-
-        async function gen() {
-            // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
-            if (websiteMode) {
-                setMasterArray(await foobar1())
-                //alert(masterArray)
-                setMasterData(await foobar3())
-                //alert(masterData.length)
-            }
-
-            //compileData();
-            //doEverythingICant();
-            doItBetter();
-            //return;
-            // DERIVE IDS, CONNECTIONS FROM MASTER
-            setMaxPos(2000 + slackIds.length * 8);
-
-            // Eleminate any ids in connections that don't exist
-            for (let i = 0; i < slackConnections.length; i++) {
-                let nodeConnections = slackConnections[i];
-                for (let j = nodeConnections.length - 1; j >= 0; j--) {
-                    if (
-                        !slackIds.includes(nodeConnections[j]) ||
-                        nodeConnections[j] == slackIds[i]
-                    ) {
-                        nodeConnections.splice(j, 1);
-                    }
-                }
-                slackConnections[i] = nodeConnections;
-
-                // Create randomly generated strengths for each connection
-
-                let randomStrengths = [];
-                for (let x = 0; x < nodeConnections.length; x++) {
-                    randomStrengths.push(Math.ceil(Math.random() * 100));
-                }
-                slackConnectionStrengths.push(randomStrengths);
-
-                // constructor(slackId, connections, id, connectionStrength)
-                nodes.push(
-                    new Node(
-                        slackIds[i],
-                        slackConnections[i],
-                        i,
-                        slackConnectionStrengths[i],
-                    ),
-                );
-            }
-
-            // generate connections for each node (visual)
-            for (let i = 0; i < nodes.length; i++) {
-                nodes[i].generateConnections();
-            }
-
-            mapLoaded = true;
-            //setKing(slackIds.indexOf("U07QLM85S7J")); // person who put in their thingy
         
-            
-            //check if there's an id query in url
-            let idQuery = $page.url.searchParams.get('id')
-            if (idQuery) {
-                if (slackIds.includes(idQuery)) {
-                    console.log("autofocus to", idQuery)
-                    setKing(slackIds.indexOf(idQuery));
-                }
-            }
-        }
+
+        
 
         // for smoothness
         var targetX = 0;
@@ -368,7 +200,12 @@
                 setCameraZoom(10);
                 ds = 0;
             }
-            //cameraZoom = Math.sin(tick) + 1;
+
+            if (mouseDown) {
+                mouseTimer++;
+                //alert("yo")
+            }
+            console.log(mouseTimer);
 
             if (panOriginX != null) {
                 setZoomToKing(false);
@@ -413,7 +250,7 @@
 
             if (resetMode) {
                 setCameraZoom(cameraZoom + (0.05 - cameraZoom) / 30);
-                
+
                 targetX = cameraX;
                 targetY = cameraY;
             }
@@ -424,8 +261,8 @@
             if (king != prevKing) {
                 prevKing = king;
                 if (king != null) {
-                    setKingMode(true)
-                    
+                    setKingMode(true);
+
                     setZoomToKing(true);
                     assembleKing();
                 }
@@ -464,7 +301,10 @@
                 setTaken(king);
             }
             for (let i = 0; i < nodes.length; i++) {
-                nodes[i].touch();
+                if (mouseClickedNode || document.body.style.cursor !== "grab") {
+                    nodes[i].touch(mouseClickedNode);
+                }
+
                 if (nodes[i].circleTouched) {
                     circle = i;
                 }
@@ -479,17 +319,21 @@
                 let temp = nodes[i];
                 temp.display();
             }
-            
+
             // do not draw info box while panning, smooth mode causes flashing
             if (document.body.style.cursor === "grab") {
-                return
+                return;
             }
-            
+
             if (circle != null) {
                 nodes[circle].drawInfoBox();
             }
             if (guyTouched != null) {
-                nodes[guyTouched].drawInfoBox()
+                nodes[guyTouched].drawInfoBox();
+            }
+
+            if (mouseClickedNode) {
+                mouseClickedNode = false;
             }
         }
 
@@ -592,27 +436,33 @@
         );
         canvas.addEventListener("mousedown", function (e) {
             if (e.button == 2) {
+                // right click
+
                 setMouseDown(true);
                 if (king && kingModeW) {
-                    reset()
+                    reset();
                 }
             } else {
-                // right click
+                // left click
                 if (panOriginX == null) {
                     panOriginX = e.clientX - mOffsetX;
                     panOriginY = e.clientY - mOffsetY;
                 }
                 panX = e.clientX - mOffsetX;
-                panY = e.clientY;
+                panY = e.clientY - mOffsetY;
+
+                
 
                 setZoomToKing(false);
 
-                setMouseDown(false);
+                if (!mouseDown) {
+                    mouseTimer = 0; // reset timer if first time pressing
+                }
+                setMouseDown(true);
 
                 setResetMode(false);
 
                 document.body.style.cursor = "grab";
-                
             }
         });
         document.addEventListener("mousemove", function (e) {
@@ -628,9 +478,15 @@
         });
         document.addEventListener("mouseup", function (e) {
             if (e.button == 2) {
+                // right click
+
                 setMouseDown(false);
             } else {
-                // right click
+                setMouseDown(false);
+                if (mouseTimer < 35) {
+                    mouseClickedNode = true;
+                }
+                // left click
                 panOriginX = null;
                 document.body.style.cursor = "auto";
             }
@@ -644,50 +500,56 @@
     });
 
     function hide() {
-        console.log("hiding control hint panel")
-        localStorage.setItem('hintsHidden', 'yes')
+        console.log("hiding control hint panel");
+        localStorage.setItem("hintsHidden", "yes");
 
-        hintsAreHidden = "hidden"
+        hintsAreHidden = "hidden";
     }
 
-    kingModeW.subscribe(zoomed => {
+    kingModeW.subscribe((zoomed) => {
         if (zoomed) {
             //reset info
-            infoUsername = ""
-            infoSlackID = ""
-            infoConnections = ""
-            infoRank = ""
-            infoScanned = ""
+            infoUsername = "";
+            infoSlackID = "";
+            infoConnections = "";
+            infoRank = "";
+            infoScanned = "";
 
-            let info = masterData.find(item => item.slack_id === slackIds[king])
-            let bubble = masterArray.find(item => item.slack_id === slackIds[king])
-            console.log("bubble is", bubble)
-            infoIsHidden = ""
+            let info = masterData.find(
+                (item) => item.slack_id === slackIds[king],
+            );
+            let bubble = masterArray.find(
+                (item) => item.slack_id === slackIds[king],
+            );
+            console.log("bubble is", bubble);
+            infoIsHidden = "";
 
-            infoUsername = info.username
-            infoSlackID = info.slack_id
+            infoUsername = info.username;
+            infoSlackID = info.slack_id;
             if (bubble) {
-                infoConnections = bubble.id_list.length
-                infoRank = masterArray.findIndex(item => item.slack_id === slackIds[king]) + 1
-                infoScanned = "true"
+                infoConnections = bubble.id_list.length;
+                infoRank =
+                    masterArray.findIndex(
+                        (item) => item.slack_id === slackIds[king],
+                    ) + 1;
+                infoScanned = "true";
             } else {
-                infoScanned = "false"
-                infoRank = "n/a"
-                infoConnections = "n/a"
+                infoScanned = "false";
+                infoRank = "n/a";
+                infoConnections = "n/a";
             }
-            
         } else {
-            infoIsHidden = "hidden"
+            infoIsHidden = "hidden";
         }
-    })
+    });
 
-    infoPanelVisible.subscribe(bool => {
+    infoPanelVisible.subscribe((bool) => {
         if (bool) {
-            infoHiddenOverride = ""
+            infoHiddenOverride = "";
         } else {
-            infoHiddenOverride = "hidden"
+            infoHiddenOverride = "hidden";
         }
-    })
+    });
 </script>
 
 <svelte:window
@@ -703,24 +565,29 @@
         <!-- <span class="text-slate-600 font-bold text-5xl text-center">network visualizer here</span> -->
         <span class="text-slate-600 font-bold text-5xl text-center">
             loading network visualizer
-            <br>
+            <br />
             <i class="fa-solid fa-spinner animate-spin text-9xl mt-5"></i>
         </span>
-        
     </div>
-    
-    <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}></canvas>
 
-    <button on:click={hide} class="{hintsAreHidden} absolute z-30 p-3 m-3 right-0 bottom-0 bg-black/40 text-white cursor-pointer text-left">
+    <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}
+    ></canvas>
+
+    <button
+        on:click={hide}
+        class="{hintsAreHidden} absolute z-30 p-3 m-3 right-0 bottom-0 bg-black/40 text-white cursor-pointer text-left"
+    >
         <h1 class="font-bold">control hints</h1>
         <span>left click - pan</span>
         <i class="fa-solid fa-computer-mouse-button-left"></i>
-        <br>
+        <br />
         <span>right click - toggle focus</span>
-        <br>
+        <br />
     </button>
 
-    <div class="{infoIsHidden} {infoHiddenOverride} absolute z-30 p-3 m-3 left-0 bottom-0 bg-black/40 text-white pointer-events-none">
+    <div
+        class="{infoIsHidden} {infoHiddenOverride} absolute z-30 p-3 m-3 left-0 bottom-0 bg-black/40 text-white pointer-events-none"
+    >
         <div class="grid grid-cols-[max-content_auto] gap-x-2 gap-y-1">
             <span class="base">username: </span>
             <span class="info">{infoUsername}</span>
@@ -751,7 +618,7 @@
     }
 
     .base {
-        @apply  font-light text-right;
+        @apply font-light text-right;
     }
 
     .info {
