@@ -1,9 +1,9 @@
 <script>
-    import { zoomedToKing, reset } from "$lib/visualizer";
+    import { zoomedToKing, kingModeW, reset } from "$lib/visualizer";
 
     let recenterDisabled = false
 
-    zoomedToKing.subscribe(zoomed => {
+    kingModeW.subscribe(zoomed => {
         recenterDisabled = !zoomed
     })
 </script>

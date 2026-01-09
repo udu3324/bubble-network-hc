@@ -20,6 +20,12 @@ export function setKingCircle(i) {
     kingCircle = i;
 }
 
+export let kingMode = false;
+export function setKingMode(i) {
+    kingMode=i;
+    kingModeW.set(i);
+}
+
 
 
 export var canvas
@@ -88,7 +94,7 @@ export function setZoomToKing(bool) {
     zoomToKing = bool
     zoomedToKing.set(zoomToKing)
 }
-
+export let kingModeW = writable(false)
 export let zoomedToKing = writable(false)
 
 class Vector2 {
@@ -107,7 +113,7 @@ class Node { // id correlates to id in the list of peoples
         this.connectionDisplay = []; // display only if your id is less
         this.connectionIds = [];
         this.pos = new Vector2(0, 0); // position
-        this.rad = 25;
+        this.rad = 50;
         while (true) { // find a random position for the node to be
             let dir = Math.random() * Math.PI * 2;
             let r = Math.random() * maxPos;
@@ -257,7 +263,7 @@ class Node { // id correlates to id in the list of peoples
     showName() {
         // Show username
         let size = this.displayName.length;
-        let fontSize = 15;
+        let fontSize = 60/(1+Math.min(Math.pow(this.displayName.length/10,2)/20, 3));
         ctx.font = cameraZoom * fontSize + "px monospace";
         ctx.fillStyle = "white"
         ctx.fillText(this.displayName, posX(this.pos.x - size * fontSize / 3), posY(this.pos.y + this.rad * 2))
@@ -343,10 +349,17 @@ class Node { // id correlates to id in the list of peoples
             ctx.drawImage(this.img, mouseX + 5 + offset, mouseY - offset - 95, 90, 90)
         }
         ctx.fillStyle = "white"
+        // show name
         ctx.font = "25px Courier New"
         ctx.fillText(this.displayName, mouseX + offset + 105, mouseY - offset - 45)
-        ctx.font = "8px monospace"
+        // show # of connections
+        ctx.font = "12px Courier New";
+        ctx.fillText("@'s: " + this.connectionIds.length, mouseX + offset + 105, mouseY - offset - 20);
+        // show slack id
+        ctx.font = "7px monospace"
+        ctx.globalAlpha = 0.8;
         ctx.fillText("ID: " + this.user, mouseX + offset + 102, mouseY - offset - 10)
+        ctx.globalAlpha = 1
     }
 }
 
@@ -423,6 +436,7 @@ export function posY(y) {
 
 export function reset() {
     setKing(null);
+    setKingMode(false);
     zoomToKing = false;
     zoomedToKing.set(zoomToKing)
 }

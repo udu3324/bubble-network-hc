@@ -40,6 +40,9 @@
         zoomToKing,
         dataSlackIds,
         dataIndexes,
+        kingMode,
+        setKingMode,
+        kingModeW
     } from "$lib/visualizer";
     import { onMount } from "svelte";
 
@@ -49,6 +52,7 @@
     let canvas;
     let canvasWidth = 0;
     let canvasHeight = 0;
+
 
     let innerScreenWidth = 0;
     let innerScreenHeight = 0;
@@ -261,6 +265,7 @@
             }
 
             mapLoaded = true;
+            //setKing(slackIds.indexOf("U07QLM85S7J")); // person who put in their thingy
         }
 
         // for smoothness
@@ -357,6 +362,8 @@
             if (king != prevKing) {
                 prevKing = king;
                 if (king != null) {
+                    setKingMode(true)
+                    
                     setZoomToKing(true);
                     assembleKing();
                 }
@@ -388,6 +395,7 @@
 
         function displayNodes() {
             //alert("h")
+            let guyTouched = null;
             setTaken(null);
             let circle = null;
             if (king != null) {
@@ -397,6 +405,9 @@
                 nodes[i].touch();
                 if (nodes[i].circleTouched) {
                     circle = i;
+                }
+                if (nodes[i].touched) {
+                    guyTouched = i;
                 }
             }
             for (let i = 0; i < nodes.length; i++) {
@@ -409,6 +420,9 @@
 
             if (circle != null) {
                 nodes[circle].drawInfoBox();
+            }
+            if (guyTouched != null) {
+                nodes[guyTouched].drawInfoBox()
             }
         }
 
