@@ -8,11 +8,11 @@
     })
 </script>
 <div class="bg-slate-900 mt-3 h-10 rounded-lg flex space-x-2">
-    <button disabled={recenterDisabled} class="bg-blue-600 text-blue-100 disabled:bg-blue-950 disabled:text-blue-900" on:click={reset}>
+    <button disabled={recenterDisabled} class="bg-blue-600 text-blue-100" on:click={reset}>
         <i class="fa-solid fa-arrows-to-dot"></i> Reset View
     </button>
 
-    <button class="bg-green-600 text-green-100 disabled:bg-green-950 disabled:text-green-900">
+    <button class="bg-green-600 text-green-100">
         <i class="fa-solid fa-floppy-disk"></i> Save Image
     </button>
 </div>
@@ -21,11 +21,11 @@
     @reference "tailwindcss";
     
     button {
-        @apply text-xl rounded-lg h-10 px-3 cursor-pointer font-light;
+        @apply text-xl rounded-lg h-10 px-3 cursor-pointer font-light hover:brightness-90;
     }
 
     button:disabled {
-        @apply cursor-not-allowed;
+        @apply cursor-not-allowed brightness-40;
     }
     
 </style>

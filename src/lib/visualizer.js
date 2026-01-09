@@ -3,6 +3,10 @@ import { foobar1, foobar3 } from "./supabaseClient";
 
 export let centerX = 0
 export let centerY = 0
+export function setCenters(x, y) {
+    centerX = x
+    centerY = y
+}
 
 export let mouseDown = false;
 export function setMouseDown(i) {
@@ -261,6 +265,10 @@ class Node { // id correlates to id in the list of peoples
         return Math.pow(this.connectionLines.length, 2) > Math.pow(visibility, 2) / cameraZoom
     }
     showName() {
+
+        if (document.body.style.cursor === "grab") {
+            return
+        }
         // Show username
         let size = this.displayName.length;
         let fontSize = 60/(1+Math.min(Math.pow(this.displayName.length/10,2)/20, 3));

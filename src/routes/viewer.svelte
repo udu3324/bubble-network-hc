@@ -42,17 +42,23 @@
         dataIndexes,
         kingMode,
         setKingMode,
-        kingModeW
+        kingModeW,
+
+        setCenters
+
     } from "$lib/visualizer";
     import { onMount } from "svelte";
 
     import { foobar1, foobar3 } from "../lib/supabaseClient";
+    import { page } from "$app/stores";
 
     let divis;
     let canvas;
     let canvasWidth = 0;
     let canvasHeight = 0;
 
+    let mOffsetX = 0
+    let mOffsetY = 0
 
     let innerScreenWidth = 0;
     let innerScreenHeight = 0;
@@ -68,6 +74,11 @@
         if ((innerScreenWidth || innerScreenHeight) && reactiveReady) {
             canvasWidth = divis.getBoundingClientRect().width;
             canvasHeight = divis.getBoundingClientRect().height;
+
+            mOffsetX = divis.getBoundingClientRect().left;
+            mOffsetY = divis.getBoundingClientRect().top;
+
+            setCenters(canvasWidth / 2, canvasHeight / 2)
         }
     }
 
@@ -79,12 +90,8 @@
 
         //console.log(canvasWidth, canvasHeight);
 
-        function focusUser(slackId) {
-            setKing(slackIds.indexOf(slackId));
-        }
-
-        var mOffsetX = divis.getBoundingClientRect().left;
-        var mOffsetY = divis.getBoundingClientRect().top; //canvas.getBoundingClientRect().top
+        mOffsetX = divis.getBoundingClientRect().left;
+        mOffsetY = divis.getBoundingClientRect().top; //canvas.getBoundingClientRect().top
         //console.log(canvas.getBoundingClientRect());
         //console.log(divis.getBoundingClientRect());
 
@@ -266,6 +273,16 @@
 
             mapLoaded = true;
             //setKing(slackIds.indexOf("U07QLM85S7J")); // person who put in their thingy
+        
+        
+            //check if there's an id query in url
+            let idQuery = $page.url.searchParams.get('id').trim()
+            if (idQuery) {
+                if (slackIds.includes(idQuery)) {
+                    console.log("autofocus to", idQuery)
+                    setKing(slackIds.indexOf(idQuery));
+                }
+            }
         }
 
         // for smoothness
@@ -417,7 +434,11 @@
                 let temp = nodes[i];
                 temp.display();
             }
-
+            
+            if (document.body.style.cursor === "grab") {
+                return
+            }
+            
             if (circle != null) {
                 nodes[circle].drawInfoBox();
             }
@@ -522,9 +543,10 @@
         document.addEventListener("contextmenu", (event) =>
             event.preventDefault(),
         );
-
         canvas.addEventListener("mousedown", function (e) {
             if (e.button == 2) {
+                setMouseDown(true);
+            } else {
                 // right click
                 if (panOriginX == null) {
                     panOriginX = e.clientX - mOffsetX;
@@ -538,8 +560,7 @@
                 setMouseDown(false);
 
                 document.body.style.cursor = "grab";
-            } else {
-                setMouseDown(true);
+                
             }
         });
         document.addEventListener("mousemove", function (e) {
@@ -554,11 +575,11 @@
         });
         document.addEventListener("mouseup", function (e) {
             if (e.button == 2) {
+                setMouseDown(false);
+            } else {
                 // right click
                 panOriginX = null;
                 document.body.style.cursor = "auto";
-            } else {
-                setMouseDown(false);
             }
         });
 
