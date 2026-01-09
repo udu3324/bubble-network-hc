@@ -292,9 +292,11 @@ class Node { // id correlates to id in the list of peoples
     }
     showName() {
 
-        if (document.body.style.cursor === "grab") {
+        // dont show usernames in main view when panning, smooth panning causes flashing of usernames
+        if ((document.body.style.cursor === "grab") && !kingMode) {
             return
         }
+        
         // Show username
         let size = this.displayName.length;
         let fontSize = 60 / (1 + Math.min(Math.pow(this.displayName.length / 10, 2) / 20, 3));
@@ -479,6 +481,7 @@ export function reset() {
 export function clearData() {
     slackIds = []
     slackConnections = []
+    nodes = []
 }
 
 export { Vector2, Node, Connection, Shell }

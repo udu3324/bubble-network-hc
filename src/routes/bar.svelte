@@ -26,7 +26,7 @@
     </button>
 
     <button disabled class="bg-green-600 text-green-100 absolute right-0">
-        <i class="fa-solid fa-floppy-disk"></i> Share
+        <i class="fa-solid fa-share"></i> Share
     </button>
 </div>
 

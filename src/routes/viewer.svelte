@@ -480,6 +480,7 @@
                 temp.display();
             }
             
+            // do not draw info box while panning, smooth mode causes flashing
             if (document.body.style.cursor === "grab") {
                 return
             }
