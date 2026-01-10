@@ -53,7 +53,13 @@
         masterArray,
         doItBetter,
         gen,
-        mapLoaded
+        mapLoaded,
+
+        kingShells,
+
+        setKingShells
+
+
     } from "$lib/visualizer";
     import { onMount } from "svelte";
 
@@ -108,6 +114,7 @@
     let lastTime = performance.now();
 
     onMount(() => {
+        console.log("visualizer component mounted")
         
         if (!localStorage.getItem("hintsHidden")) {
             hintsAreHidden = "";
@@ -169,7 +176,7 @@
         var kingStrengths = [];
         var prevKing = null;
 
-        var kingShells = []; // shells to hold the nodes
+        
 
         // shell constants
         const _shellInitCount = 3;
@@ -368,7 +375,7 @@
             // CREATE THE SHELLS
 
             // find needed # of shells
-            kingShells = [];
+            setKingShells([])
             let numShells = 0;
             let slotsNeeded = kingCircle.length;
             while (true) {

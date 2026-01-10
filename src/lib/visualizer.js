@@ -88,6 +88,11 @@ export function setKing(i) {
     king = i
 }
 
+export var kingShells = []; // shells to hold the nodes
+export function setKingShells(i) {
+    kingShells = i;
+}
+
 export let cameraX = 0
 export function setCameraX(i) {
     cameraX = i
@@ -485,6 +490,7 @@ export function clearData() {
     slackIds = []
     slackConnections = []
     nodes = []
+    kingCircle = []
 }
 
 export function doItBetter() {
@@ -532,6 +538,8 @@ export function doItBetter() {
 
 
 export async function gen() {
+    console.log("generating visualizer")
+
     // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
     setMasterArray(await foobar1());
     //alert(masterArray)

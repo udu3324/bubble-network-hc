@@ -1,5 +1,6 @@
 <script>
     import { hasData, isAuthed } from "$lib";
+    import { gen } from "$lib/visualizer";
 
     let output = "..."
     let disableCaching = true
@@ -55,7 +56,9 @@
         disableCaching = false
 
         status = "done"
-        output = `all your connections have been cached`
+        output = `all your connections have been cached, if there's any problems refresh page first`
+
+        gen()
     }
 </script>
 <div>
