@@ -104,7 +104,11 @@
         }
     }
 
+    let ticker = 0;
+    let lastTime = performance.now();
+
     onMount(() => {
+        
         if (!localStorage.getItem("hintsHidden")) {
             hintsAreHidden = "";
         }
@@ -170,9 +174,8 @@
         const _shellInitCount = 3;
         const _shellInitRadius = 200;
 
-        var ticker = 0;
-        function tick() {
-            ticker += 0.2;
+        function tick(delta) {
+            ticker += delta
 
             if (!mapLoaded) {
                 return;
@@ -202,7 +205,7 @@
             }
 
             if (mouseDown) {
-                mouseTimer++;
+                mouseTimer += delta;
                 //alert("yo")
             }
             console.log(mouseTimer);
@@ -437,11 +440,6 @@
         canvas.addEventListener("mousedown", function (e) {
             if (e.button == 2) {
                 // right click
-
-                setMouseDown(true);
-                if (king && kingModeW) {
-                    reset();
-                }
             } else {
                 // left click
                 if (panOriginX == null) {
@@ -483,17 +481,26 @@
                 setMouseDown(false);
             } else {
                 setMouseDown(false);
-                if (mouseTimer < 35) {
+                if (mouseTimer < 150) {
                     mouseClickedNode = true;
+
+                    if (king && kingModeW) {
+                        console.log("exiting", mouseTimer, document.body.style.cursor)
+                        reset();
+                    }
                 }
+                
                 // left click
                 panOriginX = null;
                 document.body.style.cursor = "auto";
             }
         });
 
-        function loop() {
-            tick();
+        function loop(now) {
+            const delta = now - lastTime;
+            lastTime = now;
+
+            tick(delta);
             requestAnimationFrame(loop);
         }
         requestAnimationFrame(loop);
@@ -578,10 +585,9 @@
         class="{hintsAreHidden} absolute z-30 p-3 m-3 right-0 bottom-0 bg-black/40 text-white cursor-pointer text-left"
     >
         <h1 class="font-bold">control hints</h1>
-        <span>left click - pan</span>
-        <i class="fa-solid fa-computer-mouse-button-left"></i>
+        <span>left click - pan, focus, reset view</span>
         <br />
-        <span>right click - toggle focus</span>
+        <span>scroll - zoom in and out</span>
         <br />
     </button>
 
