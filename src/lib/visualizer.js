@@ -335,9 +335,11 @@ export function tick(delta) {
     ctx.fillStyle = "##0f172b"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    ctx.beginPath()
-    ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI)
-    ctx.stroke()
+    if (!isBot) {
+        ctx.beginPath()
+        ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI)
+        ctx.stroke()
+    }
 
     cameraZoom += ds
     ds *= df

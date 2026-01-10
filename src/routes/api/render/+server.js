@@ -51,7 +51,7 @@ export async function GET({ url }) {
     const element = await page.waitForSelector("#viewport")
     await element.evaluate(el => el.scrollIntoView())
 
-    const box = await element.boundingBox()
+    await new Promise(resolve => setTimeout(resolve, 1500))
 
     const screenshot = await element.screenshot({
         type: 'png',

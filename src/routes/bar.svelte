@@ -56,7 +56,7 @@
         setTimeout(shareAction, 50)
     }
 
-    function shareAction() {
+    async function shareAction() {
         // put node canvas onto the copy canvas
         let scale = 1
         let dx = 0,
@@ -127,6 +127,10 @@
         // draw image
         const userImage = new Image()
         userImage.src = `/api/slack/avatar?url=${masterData[king].profile_picture}`
+        await new Promise((resolve, reject) => {
+            userImage.onload = () => resolve(userImage)
+            userImage.onerror = reject
+        })
         context.drawImage(userImage, 5, canvasHeight - 95, 90,90)
 
         // bot endpoint
