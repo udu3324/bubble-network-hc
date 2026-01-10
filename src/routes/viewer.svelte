@@ -137,15 +137,16 @@
 
         // ADD TO WHERE THE REDUCE CONNECTIONS WHEN ZOOMED OUT INCREASES CUT WHEN THERES MORE CONNECTIONS AVG
 
-        gen();
-        //check if there's an id query in url
-        let idQuery = $page.url.searchParams.get("id");
-        if (idQuery) {
-            if (slackIds.includes(idQuery)) {
-                console.log("autofocus to", idQuery);
-                setKing(slackIds.indexOf(idQuery));
+        gen().then(() => {
+            //check if there's an id query in url
+            let idQuery = $page.url.searchParams.get("id");
+            if (idQuery) {
+                if (slackIds.includes(idQuery)) {
+                    console.log("autofocus to", idQuery);
+                    setKing(slackIds.indexOf(idQuery));
+                }
             }
-        }
+        })
 
         // OVERRIDE RANDOMNESS BY CALLING FOOBAR FUNCTIONS
 
