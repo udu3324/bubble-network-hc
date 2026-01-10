@@ -127,17 +127,43 @@ export function setMouseClickedNode(bool) {
     mouseClickedNode = bool
 }
 
-function randomColor() {
-    let total = 0
-    while (true) {
-        let r = Math.random() * 255
-        let g = Math.random() * 255
-        let b = Math.random() * 255
-        total = r + g + b // target >= 150-200
-        if (total >= 150) {
-            return "rgb(" + r + "," + g + "," + b + ")"
-        }
+let code = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function getTotalFromCode(c) {
+    let total = 0;
+    for (let i = 0; i < c.length; i++) {
+        total += Math.abs(code.indexOf(c[i]));
+    } 
+    return total;
+}
+
+function cyrb128(str) {
+    let h1 = 1779033703, h2 = 3144134277,
+        h3 = 1013904242, h4 = 2773480762;
+    for (let i = 0, k; i < str.length; i++) {
+        k = str.charCodeAt(i);
+        h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
+        h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
+        h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
+        h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
     }
+    h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
+    h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
+    h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
+    h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
+    h1 ^= (h2 ^ h3 ^ h4), h2 ^= h1, h3 ^= h1, h4 ^= h1;
+    return [h1>>>0, h2>>>0, h3>>>0, h4>>>0];
+}
+
+function randomColor(seed) {
+    // convert seed to color
+    // substring from (2-length)
+    // ex: U0 [8RUQLU128]
+    
+    seed = seed.substring(2);
+    let newSeed = cyrb128(seed);
+    
+    return "rgb(" + newSeed[0] % 255 + "," + newSeed[1] % 255 + "," + newSeed[2] % 255 + ")"
 }
 
 let mapLoaded = false
@@ -554,7 +580,7 @@ class Node { // id correlates to id in the list of peoples
         }
         this.startX = this.pos.x
         this.startY = this.pos.y
-        this.color = randomColor() // random color
+        this.color = randomColor(this.user) // random color
         this.touched = false
         this.circleTouched = false // is in kingcircle and is hovered over (king included)
         this.connectionLines = []
@@ -566,6 +592,9 @@ class Node { // id correlates to id in the list of peoples
         //console.log(masterData[this.dataId].username);
         try {
             this.displayName = masterData[this.dataId].username
+            if (this.displayName.length>20) {
+                this.displayName = this.displayName.substring(0,20);
+            }
         } catch (error) {
             console.error(error)
 
