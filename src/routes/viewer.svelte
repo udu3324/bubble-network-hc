@@ -51,15 +51,10 @@
         slackConnections,
         setMasterArray,
         masterArray,
-        doItBetter,
         gen,
         mapLoaded,
-
         kingShells,
-
         setKingShells
-
-
     } from "$lib/visualizer";
     import { onMount } from "svelte";
 
@@ -67,37 +62,27 @@
     import { page } from "$app/stores";
     import { infoPanelVisible } from "$lib";
 
-    let divis;
-    let canvas;
-    let canvasWidth = 0;
-    let canvasHeight = 0;
+    // svelte element stuff
 
-    let hintsAreHidden = "hidden";
-    let infoIsHidden = "hidden";
-    let infoHiddenOverride = "";
+    let divis
+    let canvas
+    let canvasWidth = 0
+    let canvasHeight = 0
 
-    let mOffsetX = 0;
-    let mOffsetY = 0;
+    let innerScreenWidth = 0
+    let innerScreenHeight = 0
 
-    let mouseTimer = 0;
-    let mouseClickedNode = false;
+    let hintsAreHidden = "hidden"
+    let infoIsHidden = "hidden"
+    let infoHiddenOverride = ""
 
-    let innerScreenWidth = 0;
-    let innerScreenHeight = 0;
+    let infoUsername = ""
+    let infoSlackID = ""
+    let infoConnections = ""
+    let infoRank = ""
+    let infoScanned = ""
 
-    let infoUsername = "";
-    let infoSlackID = "";
-    let infoConnections = "";
-    let infoRank = "";
-    let infoScanned = "";
-
-    // other stuff rowan did while drunk
-    var panOriginX = null;
-    var panOriginY = null;
-    var panX = 0;
-    var panY = 0;
-
-    let reactiveReady = false;
+    let reactiveReady = false
     $: {
         if ((innerScreenWidth || innerScreenHeight) && reactiveReady) {
             canvasWidth = divis.getBoundingClientRect().width;
@@ -110,208 +95,203 @@
         }
     }
 
-    let ticker = 0;
-    let lastTime = performance.now();
+    // canvas stuff
+
+    let mOffsetX = 0
+    let mOffsetY = 0
+
+    let ticker = 0
+    let lastTime = performance.now()
+
+    let mouseTimer = 0
+    let mouseClickedNode = false
+
+    var inputZoom = 12 // relative to 10
+
+    var prevCamX = null
+    var prevCamY = null
+
+    // for smoothness
+    var targetX = 0
+    var targetY = 0
+    var cameraEase = 10
+
+    var kingStrengths = []
+    var prevKing = null
+
+    // shell constants
+    const _shellInitCount = 3
+    const _shellInitRadius = 200
+    
+    // other stuff rowan did while drunk
+    var panOriginX = null
+    var panOriginY = null
+    var panX = 0
+    var panY = 0
 
     onMount(() => {
         console.log("visualizer component mounted")
         
         if (!localStorage.getItem("hintsHidden")) {
-            hintsAreHidden = "";
+            hintsAreHidden = ""
         }
 
-        canvasWidth = divis.getBoundingClientRect().width;
-        canvasHeight = divis.getBoundingClientRect().height;
+        canvasWidth = divis.getBoundingClientRect().width
+        canvasHeight = divis.getBoundingClientRect().height
 
-        reactiveReady = true;
+        reactiveReady = true
 
-        //console.log(canvasWidth, canvasHeight);
+        //console.log(canvasWidth, canvasHeight)
 
-        mOffsetX = divis.getBoundingClientRect().left;
-        mOffsetY = divis.getBoundingClientRect().top; //canvas.getBoundingClientRect().top
+        mOffsetX = divis.getBoundingClientRect().left
+        mOffsetY = divis.getBoundingClientRect().top //canvas.getBoundingClientRect().top
         
-        setCanvas(canvas, canvasWidth, canvasHeight);
+        setCanvas(canvas, canvasWidth, canvasHeight)
 
-        var inputZoom = 12; // relative to 10
-
-
-        var prevCamX = null;
-        var prevCamY = null;
-
-        // HANDLE SLACK DATA
-        
-
-
-        // ADD TO WHERE THE REDUCE CONNECTIONS WHEN ZOOMED OUT INCREASES CUT WHEN THERES MORE CONNECTIONS AVG
-
+        // generate canvas stuff
         gen().then(() => {
             //check if there's an id query in url
-            let idQuery = $page.url.searchParams.get("id");
+            let idQuery = $page.url.searchParams.get("id")
             if (idQuery) {
                 if (slackIds.includes(idQuery)) {
-                    console.log("autofocus to", idQuery);
-                    setKing(slackIds.indexOf(idQuery));
+                    console.log("autofocus to", idQuery)
+                    setKing(slackIds.indexOf(idQuery))
                 }
             }
         })
 
-        // OVERRIDE RANDOMNESS BY CALLING FOOBAR FUNCTIONS
-
-        /*
-        masterArray = foobar1();
-        masterData = foobar3();
-        */
-
-        
-
-        
-
-        // for smoothness
-        var targetX = 0;
-        var targetY = 0;
-        var cameraEase = 10;
-
-        // KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
-
-        var kingStrengths = [];
-        var prevKing = null;
-
-        
-
-        // shell constants
-        const _shellInitCount = 3;
-        const _shellInitRadius = 200;
+        // ADD TO WHERE THE REDUCE CONNECTIONS WHEN ZOOMED OUT INCREASES CUT WHEN THERES MORE CONNECTIONS AVG
 
         function tick(delta) {
             ticker += delta
 
             if (!mapLoaded) {
-                return;
+                return
             }
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = "rgb(2, 31, 46)";
-            ctx.fillStyle = "##0f172b";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+            ctx.fillStyle = "rgb(2, 31, 46)"
+            ctx.fillStyle = "##0f172b"
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-            ctx.beginPath();
-            ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI);
-            ctx.stroke();
+            ctx.beginPath()
+            ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI)
+            ctx.stroke()
 
-            setCameraZoom(cameraZoom + ds);
-            ds *= df;
+            setCameraZoom(cameraZoom + ds)
+            ds *= df
 
             if (cameraZoom < 0.01) {
                 // max zoom out
-                setCameraZoom(0.01);
-                ds = 0;
+                setCameraZoom(0.01)
+                ds = 0
             }
             if (cameraZoom > 10) {
                 // max zoom in
-                setCameraZoom(10);
-                ds = 0;
+                setCameraZoom(10)
+                ds = 0
             }
 
             if (mouseDown) {
-                mouseTimer += delta;
+                mouseTimer += delta
                 //alert("yo")
             } else {
                 mouseTimer = 0
             }
-            //console.log(mouseTimer);
+            //console.log(mouseTimer)
 
             if (panOriginX != null) {
-                setZoomToKing(false);
+                setZoomToKing(false)
                 if (prevCamX == null) {
-                    prevCamX = cameraX;
-                    prevCamY = cameraY;
+                    prevCamX = cameraX
+                    prevCamY = cameraY
                 }
-                //cameraX = prevCamX - (panX - panOriginX)/cameraZoom;
-                //cameraY = prevCamY - (panY - panOriginY)/cameraZoom;
-                targetX = prevCamX - (panX - panOriginX) / cameraZoom;
-                targetY = prevCamY - (panY - panOriginY) / cameraZoom;
-                let dx = targetX - cameraX;
-                let dy = targetY - cameraY;
+                //cameraX = prevCamX - (panX - panOriginX)/cameraZoom
+                //cameraY = prevCamY - (panY - panOriginY)/cameraZoom
+                targetX = prevCamX - (panX - panOriginX) / cameraZoom
+                targetY = prevCamY - (panY - panOriginY) / cameraZoom
+                let dx = targetX - cameraX
+                let dy = targetY - cameraY
 
-                setCameraX(cameraX + dx / cameraEase);
-                setCameraY(cameraY + dy / cameraEase);
+                setCameraX(cameraX + dx / cameraEase)
+                setCameraY(cameraY + dy / cameraEase)
             } else {
                 if (prevCamX != null) {
-                    prevCamX = null;
+                    prevCamX = null
                 }
 
-                let dx = targetX - cameraX;
-                let dy = targetY - cameraY;
+                let dx = targetX - cameraX
+                let dy = targetY - cameraY
 
-                setCameraX(cameraX + dx / cameraEase);
-                setCameraY(cameraY + dy / cameraEase);
-                prevCamX = cameraX;
-                prevCamY = cameraY;
+                setCameraX(cameraX + dx / cameraEase)
+                setCameraY(cameraY + dy / cameraEase)
+                prevCamX = cameraX
+                prevCamY = cameraY
             }
 
             if (zoomToKing) {
-                setResetMode(false);
-                setCameraZoom(cameraZoom + (0.2 - cameraZoom) / 30);
-                let tX = nodes[king].pos.x;
-                let tY = nodes[king].pos.y;
+                setResetMode(false)
+                setCameraZoom(cameraZoom + (0.2 - cameraZoom) / 30)
+                let tX = nodes[king].pos.x
+                let tY = nodes[king].pos.y
 
-                setCameraX(cameraX + (tX - cameraX) / 10);
-                setCameraY(cameraY + (tY - cameraY) / 10);
-                targetX = cameraX;
-                targetY = cameraY;
+                setCameraX(cameraX + (tX - cameraX) / 10)
+                setCameraY(cameraY + (tY - cameraY) / 10)
+                targetX = cameraX
+                targetY = cameraY
             }
 
             if (resetMode) {
-                setCameraZoom(cameraZoom + (0.05 - cameraZoom) / 30);
+                setCameraZoom(cameraZoom + (0.05 - cameraZoom) / 30)
 
-                targetX = cameraX;
-                targetY = cameraY;
+                targetX = cameraX
+                targetY = cameraY
             }
 
-            //document.getElementById("d").innerHTML = panX + "," + panY;
+            //document.getElementById("d").innerHTML = panX + "," + panY
 
             // if there is a king node, create the king circle, instant update after change
             if (king != prevKing) {
-                prevKing = king;
+                prevKing = king
                 if (king != null) {
-                    setKingMode(true);
+                    setKingMode(true)
 
-                    setZoomToKing(true);
-                    assembleKing();
+                    setZoomToKing(true)
+                    assembleKing()
                 }
             }
 
             if (king != null) {
                 // display shells and bring closer to king
-                displayShells();
-                surroundNodes();
+                displayShells()
+                surroundNodes()
             }
 
             // display the nodes
 
-            displayNodes();
+            displayNodes()
         }
 
         function displayShells() {
             for (let i = 0; i < kingShells.length; i++) {
-                kingShells[i].display();
+                kingShells[i].display()
             }
             //alert(kingShells.length)
         }
 
         function surroundNodes() {
             for (let i = 0; i < kingCircle.length; i++) {
-                nodes[kingCircle[i]].approachShell();
+                nodes[kingCircle[i]].approachShell()
             }
         }
 
         function displayNodes() {
             //alert("h")
-            let guyTouched = null;
-            setTaken(null);
-            let circle = null;
+            let guyTouched = null
+            setTaken(null)
+            let circle = null
             if (king != null) {
-                setTaken(king);
+                setTaken(king)
             }
             for (let i = 0; i < nodes.length; i++) {
                 if (mouseClickedNode || document.body.style.cursor !== "grab") {
@@ -319,56 +299,57 @@
                 }
 
                 if (nodes[i].circleTouched) {
-                    circle = i;
+                    circle = i
                 }
                 if (nodes[i].touched) {
-                    guyTouched = i;
+                    guyTouched = i
                 }
             }
             for (let i = 0; i < nodes.length; i++) {
-                nodes[i].renderConnections();
+                nodes[i].renderConnections()
             }
             for (let i = 0; i < nodes.length; i++) {
-                let temp = nodes[i];
-                temp.display();
+                let temp = nodes[i]
+                temp.display()
             }
 
             // do not draw info box while panning, smooth mode causes flashing
             if (document.body.style.cursor === "grab") {
-                return;
+                return
             }
 
             if (circle != null) {
-                nodes[circle].drawInfoBox();
+                nodes[circle].drawInfoBox()
             }
             if (guyTouched != null) {
-                nodes[guyTouched].drawInfoBox();
+                nodes[guyTouched].drawInfoBox()
             }
 
             if (mouseClickedNode) {
-                mouseClickedNode = false;
+                mouseClickedNode = false
             }
         }
 
         function assembleKing() {
             // king circle = connections to the king
-            var kingNode = nodes[king];
-            //kingCircle = kingNode.connectionIds;
-            setKingCircle(kingNode.connectionIds);
-            kingStrengths = kingNode.connectionStrength;
+            // KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
+            var kingNode = nodes[king]
+            //kingCircle = kingNode.connectionIds
+            setKingCircle(kingNode.connectionIds)
+            kingStrengths = kingNode.connectionStrength
 
             // sort the powers array while keeping kingCircle array in same order
 
             for (let a = 0; a < kingStrengths.length; a++) {
                 for (let i = 0; i < kingStrengths.length - a; i++) {
                     if (kingStrengths[i] < kingStrengths[i + 1]) {
-                        let temp = kingStrengths[i];
-                        kingStrengths[i] = kingStrengths[i + 1];
-                        kingStrengths[i + 1] = temp;
+                        let temp = kingStrengths[i]
+                        kingStrengths[i] = kingStrengths[i + 1]
+                        kingStrengths[i + 1] = temp
 
-                        temp = kingCircle[i];
-                        kingCircle[i] = kingCircle[i + 1];
-                        kingCircle[i + 1] = temp;
+                        temp = kingCircle[i]
+                        kingCircle[i] = kingCircle[i + 1]
+                        kingCircle[i + 1] = temp
                     }
                 }
             }
@@ -376,19 +357,19 @@
 
             // find needed # of shells
             setKingShells([])
-            let numShells = 0;
-            let slotsNeeded = kingCircle.length;
+            let numShells = 0
+            let slotsNeeded = kingCircle.length
             while (true) {
-                numShells++;
-                slotsNeeded -= numShells * _shellInitCount;
+                numShells++
+                slotsNeeded -= numShells * _shellInitCount
                 if (slotsNeeded <= 0) {
-                    break;
+                    break
                 }
             }
 
             // create shells + assign nodes
 
-            let overallIndex = 0;
+            let overallIndex = 0
 
             for (let i = 0; i < numShells; i++) {
                 kingShells.push(
@@ -398,172 +379,172 @@
                         _shellInitRadius,
                         _shellInitCount,
                     ),
-                );
-                let currentShell = kingShells[i];
-                let nodesToAdd = (i + 1) * _shellInitCount;
-                let x = 0;
+                )
+                let currentShell = kingShells[i]
+                let nodesToAdd = (i + 1) * _shellInitCount
+                let x = 0
                 for (x = 0; x < nodesToAdd; x++) {
                     if (x + overallIndex >= kingCircle.length) {
-                        break; // will also be end of overall for loop
+                        break // will also be end of overall for loop
                     }
-                    let currentNode = nodes[kingCircle[x + overallIndex]];
-                    currentShell.children.push(currentNode);
-                    currentNode.assignShell(currentShell);
+                    let currentNode = nodes[kingCircle[x + overallIndex]]
+                    currentShell.children.push(currentNode)
+                    currentNode.assignShell(currentShell)
                 }
-                overallIndex += x;
+                overallIndex += x
 
-                currentShell.createAngles();
+                currentShell.createAngles()
             }
         }
 
         // might be better to render shapes at center of shape instead of corner as well
 
-        var userScroll = 0;
-        var ds = 0; // velocity of scroll
-        var df = 0.8; // friction for smoothness
-        var cX = 0;
-        var cY = 0;
-        var scrolling = false;
+        var userScroll = 0
+        var ds = 0 // velocity of scroll
+        var df = 0.8 // friction for smoothness
+        var cX = 0
+        var cY = 0
+        var scrolling = false
         canvas.addEventListener("wheel", function (e) {
-            e.preventDefault();
-            setZoomToKing(false);
-            setResetMode(false);
+            e.preventDefault()
+            setZoomToKing(false)
+            setResetMode(false)
             if (scrolling == false) {
-                scrolling = true;
-                cX = mouseX;
-                cY = mouseY;
+                scrolling = true
+                cX = mouseX
+                cY = mouseY
                 //setZoomToKing(false)
             }
             if (event.deltaY > 0) {
                 // zoom out
-                //cameraZoom -= cameraZoom/10;
-                ds = 0 - cameraZoom / 10;
+                //cameraZoom -= cameraZoom/10
+                ds = 0 - cameraZoom / 10
             } else if (event.deltaY < 0) {
                 // zoom in
-                //cameraZoom += cameraZoom/10;
-                ds = cameraZoom / 10;
+                //cameraZoom += cameraZoom/10
+                ds = cameraZoom / 10
             }
-        });
+        })
         document.addEventListener("contextmenu", (event) =>
             event.preventDefault(),
-        );
+        )
         canvas.addEventListener("mousedown", function (e) {
             if (e.button == 2) {
                 // right click
             } else {
                 // left click
                 if (panOriginX == null) {
-                    panOriginX = e.clientX - mOffsetX;
-                    panOriginY = e.clientY - mOffsetY;
+                    panOriginX = e.clientX - mOffsetX
+                    panOriginY = e.clientY - mOffsetY
                 }
-                panX = e.clientX - mOffsetX;
-                panY = e.clientY - mOffsetY;
+                panX = e.clientX - mOffsetX
+                panY = e.clientY - mOffsetY
 
                 
 
-                setZoomToKing(false);
+                setZoomToKing(false)
 
-                setMouseDown(true);
+                setMouseDown(true)
 
-                setResetMode(false);
+                setResetMode(false)
 
-                document.body.style.cursor = "grab";
+                document.body.style.cursor = "grab"
             }
-        });
+        })
         document.addEventListener("mousemove", function (e) {
             if (panOriginX != null) {
-                panX = e.clientX - mOffsetX;
-                panY = e.clientY - mOffsetY;
+                panX = e.clientX - mOffsetX
+                panY = e.clientY - mOffsetY
 
-                setZoomToKing(false);
-                setResetMode(false);
+                setZoomToKing(false)
+                setResetMode(false)
             }
-            setMouseX(e.clientX - mOffsetX);
-            setMouseY(e.clientY - mOffsetY);
-        });
+            setMouseX(e.clientX - mOffsetX)
+            setMouseY(e.clientY - mOffsetY)
+        })
         document.addEventListener("mouseup", function (e) {
             if (e.button == 2) {
                 // right click
 
-                setMouseDown(false);
+                setMouseDown(false)
             } else {
-                setMouseDown(false);
+                setMouseDown(false)
                 if (mouseTimer < 150) {
-                    mouseClickedNode = true;
+                    mouseClickedNode = true
 
                     if (king && kingModeW) {
                         console.log("exiting", mouseTimer, document.body.style.cursor)
-                        reset();
+                        reset()
                     }
                 }
                 
                 // left click
-                panOriginX = null;
-                document.body.style.cursor = "auto";
+                panOriginX = null
+                document.body.style.cursor = "auto"
             }
-        });
+        })
 
         function loop(now) {
-            const delta = now - lastTime;
-            lastTime = now;
+            const delta = now - lastTime
+            lastTime = now
 
-            tick(delta);
-            requestAnimationFrame(loop);
+            tick(delta)
+            requestAnimationFrame(loop)
         }
-        requestAnimationFrame(loop);
-    });
+        requestAnimationFrame(loop)
+    })
 
     function hide() {
-        console.log("hiding control hint panel");
-        localStorage.setItem("hintsHidden", "yes");
+        console.log("hiding control hint panel")
+        localStorage.setItem("hintsHidden", "yes")
 
-        hintsAreHidden = "hidden";
+        hintsAreHidden = "hidden"
     }
 
     kingModeW.subscribe((zoomed) => {
         if (zoomed) {
             //reset info
-            infoUsername = "";
-            infoSlackID = "";
-            infoConnections = "";
-            infoRank = "";
-            infoScanned = "";
+            infoUsername = ""
+            infoSlackID = ""
+            infoConnections = ""
+            infoRank = ""
+            infoScanned = ""
 
             let info = masterData.find(
                 (item) => item.slack_id === slackIds[king],
-            );
+            )
             let bubble = masterArray.find(
                 (item) => item.slack_id === slackIds[king],
-            );
-            console.log("bubble is", bubble);
-            infoIsHidden = "";
+            )
+            console.log("bubble is", bubble)
+            infoIsHidden = ""
 
-            infoUsername = info.username;
-            infoSlackID = info.slack_id;
+            infoUsername = info.username
+            infoSlackID = info.slack_id
             if (bubble) {
-                infoConnections = bubble.id_list.length;
+                infoConnections = bubble.id_list.length
                 infoRank =
                     masterArray.findIndex(
                         (item) => item.slack_id === slackIds[king],
-                    ) + 1;
-                infoScanned = "true";
+                    ) + 1
+                infoScanned = "true"
             } else {
-                infoScanned = "false";
-                infoRank = "n/a";
-                infoConnections = "n/a";
+                infoScanned = "false"
+                infoRank = "n/a"
+                infoConnections = "n/a"
             }
         } else {
-            infoIsHidden = "hidden";
+            infoIsHidden = "hidden"
         }
-    });
+    })
 
     infoPanelVisible.subscribe((bool) => {
         if (bool) {
-            infoHiddenOverride = "";
+            infoHiddenOverride = ""
         } else {
-            infoHiddenOverride = "hidden";
+            infoHiddenOverride = "hidden"
         }
-    });
+    })
 </script>
 
 <svelte:window

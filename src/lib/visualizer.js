@@ -493,7 +493,7 @@ export function clearData() {
     kingCircle = []
 }
 
-export function doItBetter() {
+function doItBetter() {
     // reset data
 
     clearData();
