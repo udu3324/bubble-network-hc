@@ -6,7 +6,7 @@ export let centerY = 0
 
 
 
-export function setCenters(x, y) {
+export function setCenters(x, y) { 
     centerX = x
     centerY = y
 }
@@ -17,15 +17,6 @@ export function setMouseDown(i) {
 }
 
 export let kingCircle = [];
-export function pushKingCircle(i) {
-    kingCircle.push(i);
-}
-export function resetKingCircle(i) {
-    kingCircle = [];
-}
-export function setKingCircle(i) {
-    kingCircle = i;
-}
 
 export let kingMode = false;
 export function setKingMode(i) {
@@ -42,6 +33,7 @@ export function setResetMode(i) {
 
 export var canvas
 export var ctx
+
 export function setCanvas(canv, width, height) {
     canvas = canv
     ctx = canvas.getContext('2d')
@@ -52,14 +44,8 @@ export function setCanvas(canv, width, height) {
     //console.log(centerX)
 }
 
-export let dataSlackIds = [];
-export let dataIndexes = [];
-
 // for hovering
-export let taken = null; // will be set to id of node getting touched innapropriately
-export function setTaken(x) {
-    taken = x
-}
+let taken = null; // will be set to id of node getting touched innapropriately
 
 export let mouseX = 0;
 export function setMouseX(i) {
@@ -70,18 +56,12 @@ export function setMouseY(i) {
     mouseY = i
 }
 
-export let nodes = []; // one node for every user
+let nodes = []; // one node for every user
 export let masterData = []; // {slackid, username, profile} username = display name
-export function setMasterData(i) {
-    masterData = i;
-}
 export let masterArray = [];
-export function setMasterArray(i) {
-    masterArray = i;
-}
 
 export let slackIds = [];
-export let slackConnections = [];
+let slackConnections = [];
 
 export let king = null
 export function setKing(i) {
@@ -89,33 +69,18 @@ export function setKing(i) {
 }
 
 export var kingShells = []; // shells to hold the nodes
-export function setKingShells(i) {
-    kingShells = i;
-}
 var kingStrengths = []
 
 // shell constants
 const _shellInitCount = 3
 const _shellInitRadius = 200
 
-export let cameraX = 0
-export function setCameraX(i) {
-    cameraX = i
-}
-export let cameraY = 0
-export function setCameraY(i) {
-    cameraY = i
-}
+let cameraX = 0
+let cameraY = 0
 
 export let cameraZoom = 0.05 // higher = zoomed in
-export function setCameraZoom(i) {
-    cameraZoom = i
-}
 
-export let maxPos = 4000
-export function setMaxPos(i) {
-    maxPos = i;
-}
+let maxPos = 4000
 
 export let zoomToKing = false; // when new focus put camera there
 export function setZoomToKing(bool) {
@@ -125,7 +90,7 @@ export function setZoomToKing(bool) {
 export let kingModeW = writable(false)
 export let zoomedToKing = writable(false)
 
-let ticker = 0
+//let ticker = 0 (future use in case)
 export let mouseTimer = 0
 export var ds = 0 // velocity of scroll
 export function setDS(x) {
@@ -181,9 +146,9 @@ function randomColor() {
 
 }
 
-export let mapLoaded = false;
+let mapLoaded = false
 
-var slackConnectionStrengths = []; // randomly generated
+var slackConnectionStrengths = [] // randomly generated
 
 class Vector2 {
     constructor(x, y) {
@@ -236,6 +201,8 @@ class Node { // id correlates to id in the list of peoples
         try {
             this.displayName = masterData[this.dataId].username;
         } catch (error) {
+            console.error(error)
+
             this.displayName = this.user
             this.failed = true;
         }
@@ -254,8 +221,6 @@ class Node { // id correlates to id in the list of peoples
         }
     }
     renderConnections() {
-        let dx = 0;
-        let dy = 0;
         if (!this.touched && taken != null) {
             this.lineFade += (0 - this.lineFade) / 5;
         } else if (!this.touched) {
@@ -454,7 +419,7 @@ class Node { // id correlates to id in the list of peoples
 }
 
 class Connection { // MAKE A FEATURE TO WHEN IF NOT FOCUSED AND NOT KING THEN IF YOUR ID IS GREATER THAN ANOTHER DON'T RENDER YOUR CONNECTIONS BC OTHER ID WILL
-    constructor(user1, user2, strength) {
+    constructor(user1, user2) {
         this.user1 = user1;
         this.user2 = user2;
         this.strength = 8;
@@ -525,7 +490,7 @@ export function posY(y) {
 }
 
 export function reset() {
-    setKing(null);
+    king = null
     setKingMode(false);
     zoomToKing = false;
     zoomedToKing.set(zoomToKing)
@@ -587,9 +552,9 @@ export async function gen() {
     console.log("generating visualizer")
 
     // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
-    setMasterArray(await foobar1());
+    masterArray = await foobar1()
     //alert(masterArray)
-    setMasterData(await foobar3());
+    masterData = await foobar3()
     //alert(masterData.length)
 
     //compileData();
@@ -597,7 +562,7 @@ export async function gen() {
     doItBetter();
     //return;
     // DERIVE IDS, CONNECTIONS FROM MASTER
-    setMaxPos(2000 + slackIds.length * 8);
+    maxPos = 2000 + slackIds.length * 8
 
     // Eleminate any ids in connections that don't exist
     for (let i = 0; i < slackConnections.length; i++) {
@@ -641,7 +606,7 @@ export async function gen() {
 }
 
 export function tick(delta) {
-    ticker += delta
+    //ticker += delta
 
     if (!mapLoaded) {
         return
@@ -656,17 +621,17 @@ export function tick(delta) {
     ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI)
     ctx.stroke()
 
-    setCameraZoom(cameraZoom + ds)
+    cameraZoom += ds
     ds *= df
 
     if (cameraZoom < 0.01) {
         // max zoom out
-        setCameraZoom(0.01)
+        cameraZoom = 0.01
         ds = 0
     }
     if (cameraZoom > 10) {
         // max zoom in
-        setCameraZoom(10)
+        cameraZoom = 10
         ds = 0
     }
 
@@ -691,8 +656,8 @@ export function tick(delta) {
         let dx = targetX - cameraX
         let dy = targetY - cameraY
 
-        setCameraX(cameraX + dx / cameraEase)
-        setCameraY(cameraY + dy / cameraEase)
+        cameraX += dx / cameraEase
+        cameraY += dy / cameraEase
     } else {
         if (prevCamX != null) {
             prevCamX = null
@@ -701,26 +666,26 @@ export function tick(delta) {
         let dx = targetX - cameraX
         let dy = targetY - cameraY
 
-        setCameraX(cameraX + dx / cameraEase)
-        setCameraY(cameraY + dy / cameraEase)
+        cameraX += dx / cameraEase
+        cameraY += dy / cameraEase
         prevCamX = cameraX
         prevCamY = cameraY
     }
 
     if (zoomToKing) {
         setResetMode(false)
-        setCameraZoom(cameraZoom + (0.2 - cameraZoom) / 30)
+        cameraZoom += (0.2 - cameraZoom) / 30
         let tX = nodes[king].pos.x
         let tY = nodes[king].pos.y
 
-        setCameraX(cameraX + (tX - cameraX) / 10)
-        setCameraY(cameraY + (tY - cameraY) / 10)
+        cameraX += (tX - cameraX) / 10
+        cameraY += (tY - cameraY) / 10
         targetX = cameraX
         targetY = cameraY
     }
 
     if (resetMode) {
-        setCameraZoom(cameraZoom + (0.05 - cameraZoom) / 30)
+        cameraZoom += (0.05 - cameraZoom) / 30
 
         targetX = cameraX
         targetY = cameraY
@@ -766,10 +731,10 @@ function surroundNodes() {
 function displayNodes() {
     //alert("h")
     let guyTouched = null
-    setTaken(null)
+    taken = null
     let circle = null
     if (king != null) {
-        setTaken(king)
+        taken = king
     }
     for (let i = 0; i < nodes.length; i++) {
         if (mouseClickedNode || document.body.style.cursor !== "grab") {
@@ -812,8 +777,7 @@ function assembleKing() {
     // king circle = connections to the king
     // KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
     var kingNode = nodes[king]
-    //kingCircle = kingNode.connectionIds
-    setKingCircle(kingNode.connectionIds)
+    kingCircle = kingNode.connectionIds
     kingStrengths = kingNode.connectionStrength
 
     // sort the powers array while keeping kingCircle array in same order
@@ -834,7 +798,7 @@ function assembleKing() {
     // CREATE THE SHELLS
 
     // find needed # of shells
-    setKingShells([])
+    kingShells = []
     let numShells = 0
     let slotsNeeded = kingCircle.length
     while (true) {
@@ -874,5 +838,3 @@ function assembleKing() {
         currentShell.createAngles()
     }
 }
-
-export { Vector2, Node, Connection, Shell }

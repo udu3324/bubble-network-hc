@@ -1,64 +1,23 @@
 <script>
     import {
-        cameraX,
-        cameraY,
         cameraZoom,
-        centerX,
-        centerY,
-        Connection,
-        ctx,
         king,
         masterData,
-        setMasterData,
-        maxPos,
-        mouseX,
-        mouseY,
-        mouseDown,
-        Node,
-        nodes,
-        posX,
-        posY,
-        setCameraX,
-        setCameraY,
-        setCameraZoom,
         setCanvas,
         setKing,
         setMouseX,
         setMouseY,
         setMouseDown,
-        setTaken,
-        Shell,
         slackIds,
-        taken,
-        Vector2,
-        setMaxPos,
-        kingCircle,
-        resetKingCircle,
-        pushKingCircle,
-        setKingCircle,
         setZoomToKing,
-        zoomToKing,
-        dataSlackIds,
-        dataIndexes,
-        kingMode,
-        setKingMode,
         kingModeW,
         setCenters,
         reset,
-        resetMode,
         setResetMode,
-        clearData,
-        slackConnections,
-        setMasterArray,
         masterArray,
         gen,
-        mapLoaded,
-        kingShells,
-        setKingShells,
         tick,
         panOriginX,
-        panOriginY,
-        ds,
         setPanOriginX,
         setPanOriginY,
         setDS,
@@ -69,7 +28,6 @@
     } from "$lib/visualizer";
     import { onMount } from "svelte";
 
-    import { foobar1, foobar3 } from "../lib/supabaseClient";
     import { page } from "$app/stores";
     import { infoPanelVisible } from "$lib";
 
@@ -113,12 +71,6 @@
     
     let lastTime = performance.now()
 
-    var inputZoom = 12 // relative to 10
-
-    var userScroll = 0
-    
-    var cX = 0
-    var cY = 0
     var scrolling = false
 
     onMount(() => {
@@ -220,8 +172,6 @@
 
         if (scrolling == false) {
             scrolling = true
-            cX = mouseX
-            cY = mouseY
             //setZoomToKing(false)
         }
         if (event.deltaY > 0) {
