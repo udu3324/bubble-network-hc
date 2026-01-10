@@ -207,8 +207,10 @@
             if (mouseDown) {
                 mouseTimer += delta;
                 //alert("yo")
+            } else {
+                mouseTimer = 0
             }
-            console.log(mouseTimer);
+            //console.log(mouseTimer);
 
             if (panOriginX != null) {
                 setZoomToKing(false);
@@ -453,9 +455,6 @@
 
                 setZoomToKing(false);
 
-                if (!mouseDown) {
-                    mouseTimer = 0; // reset timer if first time pressing
-                }
                 setMouseDown(true);
 
                 setResetMode(false);
@@ -566,7 +565,7 @@
 
 <div
     bind:this={divis}
-    class="bg-slate-800 grow rounded-lg relative place-content-center overflow-clip"
+    class="bg-slate-800 select-none grow rounded-lg relative place-content-center overflow-clip"
 >
     <div class="absolute inset-0 grid place-content-center text-center">
         <!-- <span class="text-slate-600 font-bold text-5xl text-center">network visualizer here</span> -->
