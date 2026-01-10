@@ -24,7 +24,10 @@
         setPanX,
         setPanY,
         mouseTimer,
-        setMouseClickedNode
+        setMouseClickedNode,
+
+        slackConnections
+
     } from "$lib/visualizer"
     import { onMount } from "svelte"
 
@@ -140,8 +143,8 @@
 
             infoUsername = info.username
             infoSlackID = info.slack_id
+            infoConnections = slackConnections[king].length
             if (bubble) {
-                infoConnections = bubble.id_list.length
                 infoRank =
                     masterArray.findIndex(
                         (item) => item.slack_id === slackIds[king],
@@ -150,7 +153,6 @@
             } else {
                 infoScanned = "false"
                 infoRank = "n/a"
-                infoConnections = "n/a"
             }
         } else {
             infoIsHidden = "hidden"

@@ -127,32 +127,32 @@ export function setMouseClickedNode(bool) {
     mouseClickedNode = bool
 }
 
-let code = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let code = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 function getTotalFromCode(c) {
-    let total = 0;
+    let total = 0
     for (let i = 0; i < c.length; i++) {
-        total += Math.abs(code.indexOf(c[i]));
+        total += Math.abs(code.indexOf(c[i]))
     } 
-    return total;
+    return total
 }
 
 function cyrb128(str) {
     let h1 = 1779033703, h2 = 3144134277,
-        h3 = 1013904242, h4 = 2773480762;
+        h3 = 1013904242, h4 = 2773480762
     for (let i = 0, k; i < str.length; i++) {
-        k = str.charCodeAt(i);
-        h1 = h2 ^ Math.imul(h1 ^ k, 597399067);
-        h2 = h3 ^ Math.imul(h2 ^ k, 2869860233);
-        h3 = h4 ^ Math.imul(h3 ^ k, 951274213);
-        h4 = h1 ^ Math.imul(h4 ^ k, 2716044179);
+        k = str.charCodeAt(i)
+        h1 = h2 ^ Math.imul(h1 ^ k, 597399067)
+        h2 = h3 ^ Math.imul(h2 ^ k, 2869860233)
+        h3 = h4 ^ Math.imul(h3 ^ k, 951274213)
+        h4 = h1 ^ Math.imul(h4 ^ k, 2716044179)
     }
-    h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067);
-    h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233);
-    h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213);
-    h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179);
-    h1 ^= (h2 ^ h3 ^ h4), h2 ^= h1, h3 ^= h1, h4 ^= h1;
-    return [h1>>>0, h2>>>0, h3>>>0, h4>>>0];
+    h1 = Math.imul(h3 ^ (h1 >>> 18), 597399067)
+    h2 = Math.imul(h4 ^ (h2 >>> 22), 2869860233)
+    h3 = Math.imul(h1 ^ (h3 >>> 17), 951274213)
+    h4 = Math.imul(h2 ^ (h4 >>> 19), 2716044179)
+    h1 ^= (h2 ^ h3 ^ h4), h2 ^= h1, h3 ^= h1, h4 ^= h1
+    return [h1>>>0, h2>>>0, h3>>>0, h4>>>0]
 }
 
 function randomColor(seed) {
@@ -160,8 +160,8 @@ function randomColor(seed) {
     // substring from (2-length)
     // ex: U0 [8RUQLU128]
     
-    seed = seed.substring(2);
-    let newSeed = cyrb128(seed);
+    seed = seed.substring(2)
+    let newSeed = cyrb128(seed)
     
     return "rgb(" + newSeed[0] % 255 + "," + newSeed[1] % 255 + "," + newSeed[2] % 255 + ")"
 }
@@ -194,11 +194,11 @@ export function reset() {
 }
 
 export function recenter() {
-    targetX = 0;
-    targetY = 0;
+    targetX = 0
+    targetY = 0
 }
 
-export let originalIds = [];
+export let originalIds = []
 
 function doItBetter() {
     // reset data
@@ -593,7 +593,7 @@ class Node { // id correlates to id in the list of peoples
         try {
             this.displayName = masterData[this.dataId].username
             if (this.displayName.length>20) {
-                this.displayName = this.displayName.substring(0,20);
+                this.displayName = this.displayName.substring(0,20)
             }
         } catch (error) {
             console.error(error)
@@ -772,7 +772,8 @@ class Node { // id correlates to id in the list of peoples
         if (this.img == null) { // need to load the image
             this.img = new Image()
             //this.img.crossOrigin = "anonymous" // REMOVE REMOVE REMOVE REMOVE
-            this.img.src = masterData[this.id].profile_picture
+            //workaround for cors issue
+            this.img.src = `/api/slack/avatar?url=${masterData[this.id].profile_picture}`
             this.img.onload = () => {
                 this.imgReady = true
             }
