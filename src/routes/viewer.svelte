@@ -138,7 +138,7 @@
             let bubble = masterArray.find(
                 (item) => item.slack_id === slackIds[king],
             )
-            console.log("bubble is", bubble)
+            //console.log("bubble is", bubble)
             infoIsHidden = ""
 
             infoUsername = info.username

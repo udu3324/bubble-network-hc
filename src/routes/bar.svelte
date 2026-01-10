@@ -2,7 +2,6 @@
     import { infoPanelVisible } from "$lib"
     import {
         canvas,
-        ctx,
         kingModeW,
         king,
         nodes,
@@ -33,7 +32,6 @@
 
     let prevX = 0
     let prevY = 0
-    let userImage
 
     function share() {
         if (!navigator.clipboard || !window.ClipboardItem) {
@@ -50,17 +48,9 @@
         canvasEdit.height = canvasHeight
 
         setCanvas(canvas, canvasWidth, canvasHeight)
-
         context = canvasEdit.getContext("2d")
 
         setTimeout(shareAction, 50)
-        userImage = new Image()
-        try {
-            userImage.src =  `/api/slack/avatar?url=${masterData[king].profile_picture}`
-            
-        } catch (error) {
-            console.error(error)
-        }
     }
 
     function shareAction() {
@@ -102,42 +92,44 @@
         context.fillRect(0, canvasHeight - barHeight, canvasWidth, barHeight)
 
         // info text
-        context.font = "bold 22px Courier New"
+        context.font = "bold 22px Nebula Sans"
         context.fillStyle = "white"
-        let displayText = username
-        context.fillText(displayText, barHeight+10, canvasHeight - barHeight + 25)
+        let displayText = `@${username}`
+        context.fillText(displayText, barHeight, canvasHeight - barHeight + 25)
         
         context.font = "22px Courier New"
         displayText =  "has over " + amount + " connections!"
-        context.fillText(displayText, barHeight+10, canvasHeight - barHeight + 50)
+        context.fillText(displayText, barHeight, canvasHeight - barHeight + 50)
 
         context.font = "bold 22px Courier New"
         displayText =  "         " + amount
-        context.fillText(displayText, barHeight+10, canvasHeight - barHeight + 50)
+        context.fillText(displayText, barHeight, canvasHeight - barHeight + 50)
 
         // rank + date
         let today = date.getFullYear() + "/" + (1+date.getMonth()) + "/" + date.getDate()
         context.font = "14px monospace"
         displayText =  "rank #" + rank + "  -  " + today
-        context.fillText(displayText, barHeight+10, canvasHeight - barHeight + 67) // 6.. 6.. 67!!!
+        context.fillText(displayText, barHeight, canvasHeight - barHeight + 67) // 6.. 6.. 67!!!
 
         // advertisement
-        let adShift = 25
+        let adShift = 55
         context.fillStyle = "lightblue"
         context.font = "18px Courier New"
         displayText =  "get yours in"
-        context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 85) 
+        context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
         context.font = "bold 18px Courier New"
         displayText =  "             #bubble"
-        context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 85) 
+        context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
 
         // draw image
-        ctx.drawImage(userImage, 5, canvasHeight - 70, 65,65)
+        const userImage = new Image()
+        userImage.src = `/api/slack/avatar?url=${masterData[king].profile_picture}`
+        context.drawImage(userImage, 5, canvasHeight - 95, 90,90)
 
         // copy the canvas
         canvasEdit.toBlob(function (blob) {
             const item = new ClipboardItem({ "image/png": blob })
-            console.log("writing", item)
+            //console.log("writing", item)
 
             navigator.clipboard
                 .write([item])
