@@ -31,8 +31,8 @@ export function setResetMode(i) {
 
 
 
-export var canvas
-export var ctx
+export let canvas
+export let ctx
 
 export function setCanvas(canv, width, height) {
     canvas = canv
@@ -68,8 +68,8 @@ export function setKing(i) {
     king = i
 }
 
-export var kingShells = [] // shells to hold the nodes
-var kingStrengths = []
+export let kingShells = [] // shells to hold the nodes
+let kingStrengths = []
 
 // shell constants
 const _shellInitCount = 3
@@ -92,39 +92,39 @@ export let zoomedToKing = writable(false)
 
 //let ticker = 0 (future use in case)
 export let mouseTimer = 0
-export var ds = 0 // velocity of scroll
+export let ds = 0 // velocity of scroll
 export function setDS(x) {
     ds = x
 }
-var df = 0.8 // friction for smoothness
+let df = 0.8 // friction for smoothness
 
 // other stuff rowan did while drunk
-export var panOriginX = null
+export let panOriginX = null
 export function setPanOriginX(x) {
     panOriginX = x
 }
-export var panOriginY = null
+export let panOriginY = null
 export function setPanOriginY(y) {
     panOriginY = y
 }
-var panX = 0
+let panX = 0
 export function setPanX(x) {
     panX = x
 }
-var panY = 0
+let panY = 0
 export function setPanY(y) {
     panY = y
 }
 
-var prevCamX = null
-var prevCamY = null
+let prevCamX = null
+let prevCamY = null
 
 // for smoothness
-var targetX = 0
-var targetY = 0
-var cameraEase = 10
+let targetX = 0
+let targetY = 0
+let cameraEase = 10
 
-var prevKing = null
+let prevKing = null
 
 let mouseClickedNode = false
 export function setMouseClickedNode(bool) {
@@ -148,7 +148,7 @@ function randomColor() {
 
 let mapLoaded = false
 
-var slackConnectionStrengths = [] // randomly generated
+let slackConnectionStrengths = [] // randomly generated
 
 class Vector2 {
     constructor(x, y) {
@@ -776,7 +776,7 @@ function displayNodes() {
 function assembleKing() {
     // king circle = connections to the king
     // KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
-    var kingNode = nodes[king]
+    let kingNode = nodes[king]
     kingCircle = kingNode.connectionIds
     kingStrengths = kingNode.connectionStrength
 

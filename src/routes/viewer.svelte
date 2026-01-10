@@ -71,7 +71,7 @@
     
     let lastTime = performance.now()
 
-    var scrolling = false
+    let scrolling = false
 
     onMount(() => {
         console.log("visualizer component mounted")
