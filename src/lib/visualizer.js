@@ -92,6 +92,11 @@ export var kingShells = []; // shells to hold the nodes
 export function setKingShells(i) {
     kingShells = i;
 }
+var kingStrengths = []
+
+// shell constants
+const _shellInitCount = 3
+const _shellInitRadius = 200
 
 export let cameraX = 0
 export function setCameraX(i) {
@@ -119,6 +124,47 @@ export function setZoomToKing(bool) {
 }
 export let kingModeW = writable(false)
 export let zoomedToKing = writable(false)
+
+let ticker = 0
+export let mouseTimer = 0
+export var ds = 0 // velocity of scroll
+export function setDS(x) {
+    ds = x
+}
+var df = 0.8 // friction for smoothness
+
+// other stuff rowan did while drunk
+export var panOriginX = null
+export function setPanOriginX(x) {
+    panOriginX = x
+}
+export var panOriginY = null
+export function setPanOriginY(y) {
+    panOriginY = y
+}
+var panX = 0
+export function setPanX(x) {
+    panX = x
+}
+var panY = 0
+export function setPanY(y) {
+    panY = y
+}
+
+var prevCamX = null
+var prevCamY = null
+
+// for smoothness
+var targetX = 0
+var targetY = 0
+var cameraEase = 10
+
+var prevKing = null
+
+let mouseClickedNode = false
+export function setMouseClickedNode(bool) {
+    mouseClickedNode = bool
+}
 
 function randomColor() {
     let total = 0;
@@ -592,6 +638,241 @@ export async function gen() {
 
     mapLoaded = true;
     //setKing(slackIds.indexOf("U07QLM85S7J")); // person who put in their thingy
+}
+
+export function tick(delta) {
+    ticker += delta
+
+    if (!mapLoaded) {
+        return
+    }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = "rgb(2, 31, 46)"
+    ctx.fillStyle = "##0f172b"
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+    ctx.beginPath()
+    ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI)
+    ctx.stroke()
+
+    setCameraZoom(cameraZoom + ds)
+    ds *= df
+
+    if (cameraZoom < 0.01) {
+        // max zoom out
+        setCameraZoom(0.01)
+        ds = 0
+    }
+    if (cameraZoom > 10) {
+        // max zoom in
+        setCameraZoom(10)
+        ds = 0
+    }
+
+    if (mouseDown) {
+        mouseTimer += delta
+        //alert("yo")
+    } else {
+        mouseTimer = 0
+    }
+    //console.log(mouseTimer)
+
+    if (panOriginX != null) {
+        setZoomToKing(false)
+        if (prevCamX == null) {
+            prevCamX = cameraX
+            prevCamY = cameraY
+        }
+        //cameraX = prevCamX - (panX - panOriginX)/cameraZoom
+        //cameraY = prevCamY - (panY - panOriginY)/cameraZoom
+        targetX = prevCamX - (panX - panOriginX) / cameraZoom
+        targetY = prevCamY - (panY - panOriginY) / cameraZoom
+        let dx = targetX - cameraX
+        let dy = targetY - cameraY
+
+        setCameraX(cameraX + dx / cameraEase)
+        setCameraY(cameraY + dy / cameraEase)
+    } else {
+        if (prevCamX != null) {
+            prevCamX = null
+        }
+
+        let dx = targetX - cameraX
+        let dy = targetY - cameraY
+
+        setCameraX(cameraX + dx / cameraEase)
+        setCameraY(cameraY + dy / cameraEase)
+        prevCamX = cameraX
+        prevCamY = cameraY
+    }
+
+    if (zoomToKing) {
+        setResetMode(false)
+        setCameraZoom(cameraZoom + (0.2 - cameraZoom) / 30)
+        let tX = nodes[king].pos.x
+        let tY = nodes[king].pos.y
+
+        setCameraX(cameraX + (tX - cameraX) / 10)
+        setCameraY(cameraY + (tY - cameraY) / 10)
+        targetX = cameraX
+        targetY = cameraY
+    }
+
+    if (resetMode) {
+        setCameraZoom(cameraZoom + (0.05 - cameraZoom) / 30)
+
+        targetX = cameraX
+        targetY = cameraY
+    }
+
+    //document.getElementById("d").innerHTML = panX + "," + panY
+
+    // if there is a king node, create the king circle, instant update after change
+    if (king != prevKing) {
+        prevKing = king
+        if (king != null) {
+            setKingMode(true)
+
+            setZoomToKing(true)
+            assembleKing()
+        }
+    }
+
+    if (king != null) {
+        // display shells and bring closer to king
+        displayShells()
+        surroundNodes()
+    }
+
+    // display the nodes
+
+    displayNodes()
+}
+
+function displayShells() {
+    for (let i = 0; i < kingShells.length; i++) {
+        kingShells[i].display()
+    }
+    //alert(kingShells.length)
+}
+
+function surroundNodes() {
+    for (let i = 0; i < kingCircle.length; i++) {
+        nodes[kingCircle[i]].approachShell()
+    }
+}
+
+function displayNodes() {
+    //alert("h")
+    let guyTouched = null
+    setTaken(null)
+    let circle = null
+    if (king != null) {
+        setTaken(king)
+    }
+    for (let i = 0; i < nodes.length; i++) {
+        if (mouseClickedNode || document.body.style.cursor !== "grab") {
+            nodes[i].touch(mouseClickedNode);
+        }
+
+        if (nodes[i].circleTouched) {
+            circle = i
+        }
+        if (nodes[i].touched) {
+            guyTouched = i
+        }
+    }
+    for (let i = 0; i < nodes.length; i++) {
+        nodes[i].renderConnections()
+    }
+    for (let i = 0; i < nodes.length; i++) {
+        let temp = nodes[i]
+        temp.display()
+    }
+
+    // do not draw info box while panning, smooth mode causes flashing
+    if (document.body.style.cursor === "grab") {
+        return
+    }
+
+    if (circle != null) {
+        nodes[circle].drawInfoBox()
+    }
+    if (guyTouched != null) {
+        nodes[guyTouched].drawInfoBox()
+    }
+
+    if (mouseClickedNode) {
+        mouseClickedNode = false
+    }
+}
+
+function assembleKing() {
+    // king circle = connections to the king
+    // KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
+    var kingNode = nodes[king]
+    //kingCircle = kingNode.connectionIds
+    setKingCircle(kingNode.connectionIds)
+    kingStrengths = kingNode.connectionStrength
+
+    // sort the powers array while keeping kingCircle array in same order
+
+    for (let a = 0; a < kingStrengths.length; a++) {
+        for (let i = 0; i < kingStrengths.length - a; i++) {
+            if (kingStrengths[i] < kingStrengths[i + 1]) {
+                let temp = kingStrengths[i]
+                kingStrengths[i] = kingStrengths[i + 1]
+                kingStrengths[i + 1] = temp
+
+                temp = kingCircle[i]
+                kingCircle[i] = kingCircle[i + 1]
+                kingCircle[i + 1] = temp
+            }
+        }
+    }
+    // CREATE THE SHELLS
+
+    // find needed # of shells
+    setKingShells([])
+    let numShells = 0
+    let slotsNeeded = kingCircle.length
+    while (true) {
+        numShells++
+        slotsNeeded -= numShells * _shellInitCount
+        if (slotsNeeded <= 0) {
+            break
+        }
+    }
+
+    // create shells + assign nodes
+
+    let overallIndex = 0
+
+    for (let i = 0; i < numShells; i++) {
+        kingShells.push(
+            new Shell(
+                kingNode,
+                i + 1,
+                _shellInitRadius,
+                _shellInitCount,
+            ),
+        )
+        let currentShell = kingShells[i]
+        let nodesToAdd = (i + 1) * _shellInitCount
+        let x = 0
+        for (x = 0; x < nodesToAdd; x++) {
+            if (x + overallIndex >= kingCircle.length) {
+                break // will also be end of overall for loop
+            }
+            let currentNode = nodes[kingCircle[x + overallIndex]]
+            currentShell.children.push(currentNode)
+            currentNode.assignShell(currentShell)
+        }
+        overallIndex += x
+
+        currentShell.createAngles()
+    }
 }
 
 export { Vector2, Node, Connection, Shell }
