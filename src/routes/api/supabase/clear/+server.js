@@ -1,7 +1,7 @@
-import { authTest, webhookLogSend } from "$lib/server";
-import { supabase } from "$lib/server/supabaseServiceClient";
-import { WebClient } from "@slack/web-api";
-import { json } from "@sveltejs/kit";
+import { authTest, webhookLogSend } from "$lib/server"
+import { supabase } from "$lib/server/supabaseServiceClient"
+import { WebClient } from "@slack/web-api"
+import { json } from "@sveltejs/kit"
 
 export async function GET({ request }) {
     

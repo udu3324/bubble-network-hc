@@ -1,7 +1,7 @@
 <script>
-    import Bar from "./bar.svelte";
-    import Panel from "./panel.svelte";
-    import Viewer from "./viewer.svelte";
+    import Bar from "./bar.svelte"
+    import Panel from "./panel.svelte"
+    import Viewer from "./viewer.svelte"
 
 </script>
 

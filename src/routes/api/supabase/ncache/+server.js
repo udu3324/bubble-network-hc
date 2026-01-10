@@ -1,6 +1,6 @@
-import { PUBLIC_BASE_URL } from "$env/static/public";
-import { authTest, webhookLogSend } from "$lib/server";
-import pLimit from "p-limit";
+import { PUBLIC_BASE_URL } from "$env/static/public"
+import { authTest, webhookLogSend } from "$lib/server"
+import pLimit from "p-limit"
 const limit = pLimit(5)
 
 export async function GET({ request }) {
@@ -92,5 +92,5 @@ export async function GET({ request }) {
     
     return new Response(JSON.stringify({
         good: "yes"
-    }), { status: 200 });
+    }), { status: 200 })
 }

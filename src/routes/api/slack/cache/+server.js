@@ -1,14 +1,14 @@
-import { SLACK_BOT_OAUTH_TOKEN } from '$env/static/private';
+import { SLACK_BOT_OAUTH_TOKEN } from '$env/static/private'
 
-import { supabase } from "$lib/server/supabaseServiceClient";
-import { WebClient } from "@slack/web-api";
-import { json } from "@sveltejs/kit";
+import { supabase } from "$lib/server/supabaseServiceClient"
+import { WebClient } from "@slack/web-api"
+import { json } from "@sveltejs/kit"
 
 export async function GET({ url }) {
     const id = url.searchParams.get("id")
 
     if (!id) {
-        return new Response("no valid slack id provided", { status: 401 });
+        return new Response("no valid slack id provided", { status: 401 })
     }
 
     const web = new WebClient(SLACK_BOT_OAUTH_TOKEN)
@@ -45,5 +45,5 @@ export async function GET({ url }) {
             }), { status: 400 })
     }
 
-    return new Response("good", { status: 200 });
+    return new Response("good", { status: 200 })
 }

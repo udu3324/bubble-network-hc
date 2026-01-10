@@ -1,9 +1,9 @@
 <script>
-    import CachePanel from "./CachePanel.svelte";
+    import CachePanel from "./CachePanel.svelte"
 
     
-    import OAuthButton from "./OAuthButton.svelte";
-    import ScanPanel from "./ScanPanel.svelte";
+    import OAuthButton from "./OAuthButton.svelte"
+    import ScanPanel from "./ScanPanel.svelte"
     
     
 </script>

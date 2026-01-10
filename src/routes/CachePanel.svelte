@@ -1,6 +1,6 @@
 <script>
-    import { hasData, isAuthed } from "$lib";
-    import { gen } from "$lib/visualizer";
+    import { hasData, isAuthed } from "$lib"
+    import { gen } from "$lib/visualizer"
 
     let output = "..."
     let disableCaching = true

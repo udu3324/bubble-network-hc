@@ -1,8 +1,8 @@
 <script>
 
-    import { hasData, isAuthed } from "$lib";
+    import { hasData, isAuthed } from "$lib"
 
-    import { onDestroy, onMount } from 'svelte';
+    import { onDestroy, onMount } from 'svelte'
 
     import { PUBLIC_BASE_URL, PUBLIC_SLACK_APP_CLIENT_ID } from '$env/static/public'
    
@@ -19,7 +19,7 @@
       "channels:read",
       "users.profile:read",
       "users:read"
-    ].join(",");
+    ].join(",")
 
     const slackAuthURL = 
         `https://slack.com/oauth/v2/authorize` +
@@ -35,8 +35,8 @@
     function logout() {
         statusText = "Logged out"
 
-        localStorage.removeItem("user_id");
-        localStorage.removeItem("token");
+        localStorage.removeItem("user_id")
+        localStorage.removeItem("token")
     }
 
     async function check() {
@@ -74,11 +74,11 @@
         check()
 
         intervalCheck = setInterval(check, 1000)
-	});
+	})
 
     onDestroy(() => {
         clearInterval(intervalCheck)
-	});
+	})
 
 </script>
 

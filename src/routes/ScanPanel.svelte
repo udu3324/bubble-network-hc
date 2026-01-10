@@ -1,7 +1,7 @@
 <script>
 
-    import { hasData, isAuthed } from "$lib";
-    import { onMount } from "svelte";
+    import { hasData, isAuthed } from "$lib"
+    import { onMount } from "svelte"
 
     let status = ""
     let output = "..."

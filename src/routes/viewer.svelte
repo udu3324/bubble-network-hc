@@ -25,11 +25,11 @@
         setPanY,
         mouseTimer,
         setMouseClickedNode
-    } from "$lib/visualizer";
-    import { onMount } from "svelte";
+    } from "$lib/visualizer"
+    import { onMount } from "svelte"
 
-    import { page } from "$app/stores";
-    import { infoPanelVisible } from "$lib";
+    import { page } from "$app/stores"
+    import { infoPanelVisible } from "$lib"
 
     // svelte element stuff
 
@@ -54,13 +54,13 @@
     let reactiveReady = false
     $: {
         if ((innerScreenWidth || innerScreenHeight) && reactiveReady) {
-            canvasWidth = divis.getBoundingClientRect().width;
-            canvasHeight = divis.getBoundingClientRect().height;
+            canvasWidth = divis.getBoundingClientRect().width
+            canvasHeight = divis.getBoundingClientRect().height
 
-            mOffsetX = divis.getBoundingClientRect().left;
-            mOffsetY = divis.getBoundingClientRect().top;
+            mOffsetX = divis.getBoundingClientRect().left
+            mOffsetY = divis.getBoundingClientRect().top
 
-            setCenters(canvasWidth / 2, canvasHeight / 2);
+            setCenters(canvasWidth / 2, canvasHeight / 2)
         }
     }
 

@@ -33,7 +33,7 @@ export async function webhookStatusSend(message) { //public channel
         })
     }).then(res => {
         //console.log("Request complete! response:", res);
-    });
+    })
 }
 
 export async function webhookLogSend(message) { //private
@@ -45,7 +45,7 @@ export async function webhookLogSend(message) { //private
         })
     }).then(res => {
         //console.log("Request complete! response:", res);
-    });
+    })
 }
 
 function sanitize(string) {

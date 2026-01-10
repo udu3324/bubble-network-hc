@@ -1,5 +1,5 @@
-import { supabase } from '$lib/server/supabaseServiceClient';
-import { json } from '@sveltejs/kit';
+import { supabase } from '$lib/server/supabaseServiceClient'
+import { json } from '@sveltejs/kit'
 
 export async function GET({ url }) {
 	const id = url.searchParams.get("id")

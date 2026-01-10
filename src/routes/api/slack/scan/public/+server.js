@@ -1,9 +1,9 @@
-import { PUBLIC_BASE_URL } from "$env/static/public";
-import { authTest, webhookLogSend, webhookStatusSend } from "$lib/server";
-import { supabase } from "$lib/server/supabaseServiceClient";
-import { WebClient } from "@slack/web-api";
-import { json } from "@sveltejs/kit";
-import pLimit from "p-limit";
+import { PUBLIC_BASE_URL } from "$env/static/public"
+import { authTest, webhookLogSend, webhookStatusSend } from "$lib/server"
+import { supabase } from "$lib/server/supabaseServiceClient"
+import { WebClient } from "@slack/web-api"
+import { json } from "@sveltejs/kit"
+import pLimit from "p-limit"
 const limit = pLimit(5)
 
 export async function GET({ request }) {

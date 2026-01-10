@@ -1,6 +1,6 @@
 <script>
-    import { infoPanelVisible } from "$lib";
-    import { zoomedToKing, kingModeW, reset } from "$lib/visualizer";
+    import { infoPanelVisible } from "$lib"
+    import { zoomedToKing, kingModeW, reset } from "$lib/visualizer"
 
     let recenterDisabled = false
 
