@@ -52,12 +52,12 @@ export function setMouseY(i) {
     mouseY = i
 }
 
-let nodes = [] // one node for every user
+export let nodes = [] // one node for every user
 export let masterData = [] // {slackid, username, profile} username = display name
 export let masterArray = []
 
 export let slackIds = []
-let slackConnections = []
+export let slackConnections = []
 
 export let king = null
 export function setKing(i) {
@@ -167,6 +167,13 @@ export function reset() {
     setResetMode(true)
 }
 
+export function recenter() {
+    targetX = 0;
+    targetY = 0;
+}
+
+export let originalIds = [];
+
 function doItBetter() {
     // reset data
 
@@ -174,6 +181,7 @@ function doItBetter() {
     slackConnections = []
     nodes = []
     kingCircle = []
+    originalIds = []
 
     reset()
 
@@ -184,6 +192,7 @@ function doItBetter() {
     // step 1
     for (let i = 0; i < masterData.length; i++) {
         slackIds.push(masterData[i].slack_id)
+        
         slackConnections.push([])
     }
 
@@ -194,6 +203,7 @@ function doItBetter() {
         let masterNode = masterArray[i]
         let masterSlackId = masterNode.slack_id
         let masterConnections = masterNode.id_list
+        originalIds.push(masterSlackId)
 
         for (let x = 0; x < masterConnections.length; x++) {
             // update connection for the other person
@@ -732,7 +742,7 @@ class Node { // id correlates to id in the list of peoples
         // image handling
         if (this.img == null) { // need to load the image
             this.img = new Image()
-            this.img.crossOrigin = "anonymous"
+            //this.img.crossOrigin = "anonymous" // REMOVE REMOVE REMOVE REMOVE
             this.img.src = masterData[this.id].profile_picture
             this.img.onload = () => {
                 this.imgReady = true
