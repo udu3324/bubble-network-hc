@@ -1,6 +1,9 @@
 import { PUBLIC_BASE_URL } from '$env/static/public'
 import { supabase } from '$lib/server/supabaseServiceClient'
-import puppeteer from 'puppeteer'
+import Chromium from '@sparticuz/chromium'
+import puppeteer from 'puppeteer-core'
+
+const isVercel = !!process.env.VERCEL
 
 export async function GET({ url }) {
     const id = url.searchParams.get('id')
@@ -27,7 +30,19 @@ export async function GET({ url }) {
         }), { status: 400 })
     }
 
-    const browser = await puppeteer.launch()
+    const browser = await puppeteer.launch(
+        isVercel
+            ? {
+                args: Chromium.args,
+                executablePath: await Chromium.executablePath(),
+                headless: Chromium.headless
+            }
+            : {
+                channel: 'chrome', //local chrome
+                headless: true
+            }
+    )
+
     const page = await browser.newPage()
     await page.setViewport({ width: 1280, height: 720 })
 
@@ -38,11 +53,11 @@ export async function GET({ url }) {
 
     const box = await element.boundingBox()
 
-    const screenshot = await element.screenshot({ 
+    const screenshot = await element.screenshot({
         type: 'png',
         clip: {
-            x: box.x,
-            y: box.y,
+            x: 0,
+            y: 0,
             width: 501,
             height: 370
         }

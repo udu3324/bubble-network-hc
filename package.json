@@ -30,9 +30,10 @@
 		"@slack/oauth": "^3.0.4",
 		"@slack/web-api": "^7.12.0",
 		"@slack/webhook": "^7.0.6",
+		"@sparticuz/chromium": "^143.0.4",
 		"@supabase/supabase-js": "^2.84.0",
 		"event-source-polyfill": "^1.0.31",
 		"p-limit": "^7.2.0",
-		"puppeteer": "^24.34.0"
+		"puppeteer-core": "^24.34.0"
 	}
 }
