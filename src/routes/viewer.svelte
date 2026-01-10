@@ -129,6 +129,13 @@
     var panX = 0
     var panY = 0
 
+    var userScroll = 0
+    var ds = 0 // velocity of scroll
+    var df = 0.8 // friction for smoothness
+    var cX = 0
+    var cY = 0
+    var scrolling = false
+
     onMount(() => {
         console.log("visualizer component mounted")
         
@@ -162,328 +169,6 @@
 
         // ADD TO WHERE THE REDUCE CONNECTIONS WHEN ZOOMED OUT INCREASES CUT WHEN THERES MORE CONNECTIONS AVG
 
-        function tick(delta) {
-            ticker += delta
-
-            if (!mapLoaded) {
-                return
-            }
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
-            ctx.fillStyle = "rgb(2, 31, 46)"
-            ctx.fillStyle = "##0f172b"
-            ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-            ctx.beginPath()
-            ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI)
-            ctx.stroke()
-
-            setCameraZoom(cameraZoom + ds)
-            ds *= df
-
-            if (cameraZoom < 0.01) {
-                // max zoom out
-                setCameraZoom(0.01)
-                ds = 0
-            }
-            if (cameraZoom > 10) {
-                // max zoom in
-                setCameraZoom(10)
-                ds = 0
-            }
-
-            if (mouseDown) {
-                mouseTimer += delta
-                //alert("yo")
-            } else {
-                mouseTimer = 0
-            }
-            //console.log(mouseTimer)
-
-            if (panOriginX != null) {
-                setZoomToKing(false)
-                if (prevCamX == null) {
-                    prevCamX = cameraX
-                    prevCamY = cameraY
-                }
-                //cameraX = prevCamX - (panX - panOriginX)/cameraZoom
-                //cameraY = prevCamY - (panY - panOriginY)/cameraZoom
-                targetX = prevCamX - (panX - panOriginX) / cameraZoom
-                targetY = prevCamY - (panY - panOriginY) / cameraZoom
-                let dx = targetX - cameraX
-                let dy = targetY - cameraY
-
-                setCameraX(cameraX + dx / cameraEase)
-                setCameraY(cameraY + dy / cameraEase)
-            } else {
-                if (prevCamX != null) {
-                    prevCamX = null
-                }
-
-                let dx = targetX - cameraX
-                let dy = targetY - cameraY
-
-                setCameraX(cameraX + dx / cameraEase)
-                setCameraY(cameraY + dy / cameraEase)
-                prevCamX = cameraX
-                prevCamY = cameraY
-            }
-
-            if (zoomToKing) {
-                setResetMode(false)
-                setCameraZoom(cameraZoom + (0.2 - cameraZoom) / 30)
-                let tX = nodes[king].pos.x
-                let tY = nodes[king].pos.y
-
-                setCameraX(cameraX + (tX - cameraX) / 10)
-                setCameraY(cameraY + (tY - cameraY) / 10)
-                targetX = cameraX
-                targetY = cameraY
-            }
-
-            if (resetMode) {
-                setCameraZoom(cameraZoom + (0.05 - cameraZoom) / 30)
-
-                targetX = cameraX
-                targetY = cameraY
-            }
-
-            //document.getElementById("d").innerHTML = panX + "," + panY
-
-            // if there is a king node, create the king circle, instant update after change
-            if (king != prevKing) {
-                prevKing = king
-                if (king != null) {
-                    setKingMode(true)
-
-                    setZoomToKing(true)
-                    assembleKing()
-                }
-            }
-
-            if (king != null) {
-                // display shells and bring closer to king
-                displayShells()
-                surroundNodes()
-            }
-
-            // display the nodes
-
-            displayNodes()
-        }
-
-        function displayShells() {
-            for (let i = 0; i < kingShells.length; i++) {
-                kingShells[i].display()
-            }
-            //alert(kingShells.length)
-        }
-
-        function surroundNodes() {
-            for (let i = 0; i < kingCircle.length; i++) {
-                nodes[kingCircle[i]].approachShell()
-            }
-        }
-
-        function displayNodes() {
-            //alert("h")
-            let guyTouched = null
-            setTaken(null)
-            let circle = null
-            if (king != null) {
-                setTaken(king)
-            }
-            for (let i = 0; i < nodes.length; i++) {
-                if (mouseClickedNode || document.body.style.cursor !== "grab") {
-                    nodes[i].touch(mouseClickedNode);
-                }
-
-                if (nodes[i].circleTouched) {
-                    circle = i
-                }
-                if (nodes[i].touched) {
-                    guyTouched = i
-                }
-            }
-            for (let i = 0; i < nodes.length; i++) {
-                nodes[i].renderConnections()
-            }
-            for (let i = 0; i < nodes.length; i++) {
-                let temp = nodes[i]
-                temp.display()
-            }
-
-            // do not draw info box while panning, smooth mode causes flashing
-            if (document.body.style.cursor === "grab") {
-                return
-            }
-
-            if (circle != null) {
-                nodes[circle].drawInfoBox()
-            }
-            if (guyTouched != null) {
-                nodes[guyTouched].drawInfoBox()
-            }
-
-            if (mouseClickedNode) {
-                mouseClickedNode = false
-            }
-        }
-
-        function assembleKing() {
-            // king circle = connections to the king
-            // KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
-            var kingNode = nodes[king]
-            //kingCircle = kingNode.connectionIds
-            setKingCircle(kingNode.connectionIds)
-            kingStrengths = kingNode.connectionStrength
-
-            // sort the powers array while keeping kingCircle array in same order
-
-            for (let a = 0; a < kingStrengths.length; a++) {
-                for (let i = 0; i < kingStrengths.length - a; i++) {
-                    if (kingStrengths[i] < kingStrengths[i + 1]) {
-                        let temp = kingStrengths[i]
-                        kingStrengths[i] = kingStrengths[i + 1]
-                        kingStrengths[i + 1] = temp
-
-                        temp = kingCircle[i]
-                        kingCircle[i] = kingCircle[i + 1]
-                        kingCircle[i + 1] = temp
-                    }
-                }
-            }
-            // CREATE THE SHELLS
-
-            // find needed # of shells
-            setKingShells([])
-            let numShells = 0
-            let slotsNeeded = kingCircle.length
-            while (true) {
-                numShells++
-                slotsNeeded -= numShells * _shellInitCount
-                if (slotsNeeded <= 0) {
-                    break
-                }
-            }
-
-            // create shells + assign nodes
-
-            let overallIndex = 0
-
-            for (let i = 0; i < numShells; i++) {
-                kingShells.push(
-                    new Shell(
-                        kingNode,
-                        i + 1,
-                        _shellInitRadius,
-                        _shellInitCount,
-                    ),
-                )
-                let currentShell = kingShells[i]
-                let nodesToAdd = (i + 1) * _shellInitCount
-                let x = 0
-                for (x = 0; x < nodesToAdd; x++) {
-                    if (x + overallIndex >= kingCircle.length) {
-                        break // will also be end of overall for loop
-                    }
-                    let currentNode = nodes[kingCircle[x + overallIndex]]
-                    currentShell.children.push(currentNode)
-                    currentNode.assignShell(currentShell)
-                }
-                overallIndex += x
-
-                currentShell.createAngles()
-            }
-        }
-
-        // might be better to render shapes at center of shape instead of corner as well
-
-        var userScroll = 0
-        var ds = 0 // velocity of scroll
-        var df = 0.8 // friction for smoothness
-        var cX = 0
-        var cY = 0
-        var scrolling = false
-        canvas.addEventListener("wheel", function (e) {
-            e.preventDefault()
-            setZoomToKing(false)
-            setResetMode(false)
-            if (scrolling == false) {
-                scrolling = true
-                cX = mouseX
-                cY = mouseY
-                //setZoomToKing(false)
-            }
-            if (event.deltaY > 0) {
-                // zoom out
-                //cameraZoom -= cameraZoom/10
-                ds = 0 - cameraZoom / 10
-            } else if (event.deltaY < 0) {
-                // zoom in
-                //cameraZoom += cameraZoom/10
-                ds = cameraZoom / 10
-            }
-        })
-        document.addEventListener("contextmenu", (event) =>
-            event.preventDefault(),
-        )
-        canvas.addEventListener("mousedown", function (e) {
-            if (e.button == 2) {
-                // right click
-            } else {
-                // left click
-                if (panOriginX == null) {
-                    panOriginX = e.clientX - mOffsetX
-                    panOriginY = e.clientY - mOffsetY
-                }
-                panX = e.clientX - mOffsetX
-                panY = e.clientY - mOffsetY
-
-                
-
-                setZoomToKing(false)
-
-                setMouseDown(true)
-
-                setResetMode(false)
-
-                document.body.style.cursor = "grab"
-            }
-        })
-        document.addEventListener("mousemove", function (e) {
-            if (panOriginX != null) {
-                panX = e.clientX - mOffsetX
-                panY = e.clientY - mOffsetY
-
-                setZoomToKing(false)
-                setResetMode(false)
-            }
-            setMouseX(e.clientX - mOffsetX)
-            setMouseY(e.clientY - mOffsetY)
-        })
-        document.addEventListener("mouseup", function (e) {
-            if (e.button == 2) {
-                // right click
-
-                setMouseDown(false)
-            } else {
-                setMouseDown(false)
-                if (mouseTimer < 150) {
-                    mouseClickedNode = true
-
-                    if (king && kingModeW) {
-                        console.log("exiting", mouseTimer, document.body.style.cursor)
-                        reset()
-                    }
-                }
-                
-                // left click
-                panOriginX = null
-                document.body.style.cursor = "auto"
-            }
-        })
-
         function loop(now) {
             const delta = now - lastTime
             lastTime = now
@@ -493,6 +178,241 @@
         }
         requestAnimationFrame(loop)
     })
+
+    function tick(delta) {
+        ticker += delta
+
+        if (!mapLoaded) {
+            return
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = "rgb(2, 31, 46)"
+        ctx.fillStyle = "##0f172b"
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+        ctx.beginPath()
+        ctx.arc(mouseX, mouseY, 40, 0, 2 * Math.PI)
+        ctx.stroke()
+
+        setCameraZoom(cameraZoom + ds)
+        ds *= df
+
+        if (cameraZoom < 0.01) {
+            // max zoom out
+            setCameraZoom(0.01)
+            ds = 0
+        }
+        if (cameraZoom > 10) {
+            // max zoom in
+            setCameraZoom(10)
+            ds = 0
+        }
+
+        if (mouseDown) {
+            mouseTimer += delta
+            //alert("yo")
+        } else {
+            mouseTimer = 0
+        }
+        //console.log(mouseTimer)
+
+        if (panOriginX != null) {
+            setZoomToKing(false)
+            if (prevCamX == null) {
+                prevCamX = cameraX
+                prevCamY = cameraY
+            }
+            //cameraX = prevCamX - (panX - panOriginX)/cameraZoom
+            //cameraY = prevCamY - (panY - panOriginY)/cameraZoom
+            targetX = prevCamX - (panX - panOriginX) / cameraZoom
+            targetY = prevCamY - (panY - panOriginY) / cameraZoom
+            let dx = targetX - cameraX
+            let dy = targetY - cameraY
+
+            setCameraX(cameraX + dx / cameraEase)
+            setCameraY(cameraY + dy / cameraEase)
+        } else {
+            if (prevCamX != null) {
+                prevCamX = null
+            }
+
+            let dx = targetX - cameraX
+            let dy = targetY - cameraY
+
+            setCameraX(cameraX + dx / cameraEase)
+            setCameraY(cameraY + dy / cameraEase)
+            prevCamX = cameraX
+            prevCamY = cameraY
+        }
+
+        if (zoomToKing) {
+            setResetMode(false)
+            setCameraZoom(cameraZoom + (0.2 - cameraZoom) / 30)
+            let tX = nodes[king].pos.x
+            let tY = nodes[king].pos.y
+
+            setCameraX(cameraX + (tX - cameraX) / 10)
+            setCameraY(cameraY + (tY - cameraY) / 10)
+            targetX = cameraX
+            targetY = cameraY
+        }
+
+        if (resetMode) {
+            setCameraZoom(cameraZoom + (0.05 - cameraZoom) / 30)
+
+            targetX = cameraX
+            targetY = cameraY
+        }
+
+        //document.getElementById("d").innerHTML = panX + "," + panY
+
+        // if there is a king node, create the king circle, instant update after change
+        if (king != prevKing) {
+            prevKing = king
+            if (king != null) {
+                setKingMode(true)
+
+                setZoomToKing(true)
+                assembleKing()
+            }
+        }
+
+        if (king != null) {
+            // display shells and bring closer to king
+            displayShells()
+            surroundNodes()
+        }
+
+        // display the nodes
+
+        displayNodes()
+    }
+
+    function displayShells() {
+        for (let i = 0; i < kingShells.length; i++) {
+            kingShells[i].display()
+        }
+        //alert(kingShells.length)
+    }
+
+    function surroundNodes() {
+        for (let i = 0; i < kingCircle.length; i++) {
+            nodes[kingCircle[i]].approachShell()
+        }
+    }
+
+    function displayNodes() {
+        //alert("h")
+        let guyTouched = null
+        setTaken(null)
+        let circle = null
+        if (king != null) {
+            setTaken(king)
+        }
+        for (let i = 0; i < nodes.length; i++) {
+            if (mouseClickedNode || document.body.style.cursor !== "grab") {
+                nodes[i].touch(mouseClickedNode);
+            }
+
+            if (nodes[i].circleTouched) {
+                circle = i
+            }
+            if (nodes[i].touched) {
+                guyTouched = i
+            }
+        }
+        for (let i = 0; i < nodes.length; i++) {
+            nodes[i].renderConnections()
+        }
+        for (let i = 0; i < nodes.length; i++) {
+            let temp = nodes[i]
+            temp.display()
+        }
+
+        // do not draw info box while panning, smooth mode causes flashing
+        if (document.body.style.cursor === "grab") {
+            return
+        }
+
+        if (circle != null) {
+            nodes[circle].drawInfoBox()
+        }
+        if (guyTouched != null) {
+            nodes[guyTouched].drawInfoBox()
+        }
+
+        if (mouseClickedNode) {
+            mouseClickedNode = false
+        }
+    }
+
+    function assembleKing() {
+        // king circle = connections to the king
+        // KINGNODE -> NODE THAT ENTIRE PROGRAM REVOLVES AROUND
+        var kingNode = nodes[king]
+        //kingCircle = kingNode.connectionIds
+        setKingCircle(kingNode.connectionIds)
+        kingStrengths = kingNode.connectionStrength
+
+        // sort the powers array while keeping kingCircle array in same order
+
+        for (let a = 0; a < kingStrengths.length; a++) {
+            for (let i = 0; i < kingStrengths.length - a; i++) {
+                if (kingStrengths[i] < kingStrengths[i + 1]) {
+                    let temp = kingStrengths[i]
+                    kingStrengths[i] = kingStrengths[i + 1]
+                    kingStrengths[i + 1] = temp
+
+                    temp = kingCircle[i]
+                    kingCircle[i] = kingCircle[i + 1]
+                    kingCircle[i + 1] = temp
+                }
+            }
+        }
+        // CREATE THE SHELLS
+
+        // find needed # of shells
+        setKingShells([])
+        let numShells = 0
+        let slotsNeeded = kingCircle.length
+        while (true) {
+            numShells++
+            slotsNeeded -= numShells * _shellInitCount
+            if (slotsNeeded <= 0) {
+                break
+            }
+        }
+
+        // create shells + assign nodes
+
+        let overallIndex = 0
+
+        for (let i = 0; i < numShells; i++) {
+            kingShells.push(
+                new Shell(
+                    kingNode,
+                    i + 1,
+                    _shellInitRadius,
+                    _shellInitCount,
+                ),
+            )
+            let currentShell = kingShells[i]
+            let nodesToAdd = (i + 1) * _shellInitCount
+            let x = 0
+            for (x = 0; x < nodesToAdd; x++) {
+                if (x + overallIndex >= kingCircle.length) {
+                    break // will also be end of overall for loop
+                }
+                let currentNode = nodes[kingCircle[x + overallIndex]]
+                currentShell.children.push(currentNode)
+                currentNode.assignShell(currentShell)
+            }
+            overallIndex += x
+
+            currentShell.createAngles()
+        }
+    }
 
     function hide() {
         console.log("hiding control hint panel")
@@ -539,12 +459,77 @@
     })
 
     infoPanelVisible.subscribe((bool) => {
-        if (bool) {
-            infoHiddenOverride = ""
-        } else {
-            infoHiddenOverride = "hidden"
-        }
+        infoHiddenOverride = bool ? "" : "hidden"
     })
+
+    function mouseWheelHandler(e) {
+        e.preventDefault()
+
+        setZoomToKing(false)
+        setResetMode(false)
+
+        if (scrolling == false) {
+            scrolling = true
+            cX = mouseX
+            cY = mouseY
+            //setZoomToKing(false)
+        }
+        if (event.deltaY > 0) {
+            // zoom out
+            //cameraZoom -= cameraZoom/10
+            ds = 0 - cameraZoom / 10
+        } else if (event.deltaY < 0) {
+            // zoom in
+            //cameraZoom += cameraZoom/10
+            ds = cameraZoom / 10
+        }
+    }
+
+    function mouseDownHandler(e) {
+        if (e.button === 0) { // left click
+            if (panOriginX == null) {
+                panOriginX = e.clientX - mOffsetX
+                panOriginY = e.clientY - mOffsetY
+            }
+            panX = e.clientX - mOffsetX
+            panY = e.clientY - mOffsetY
+
+            setZoomToKing(false)
+            setMouseDown(true)
+            setResetMode(false)
+
+            document.body.style.cursor = "grab"
+        }
+    }
+
+    function mouseUpHandler(e) {
+        if (e.button === 0) { //left click
+            setMouseDown(false)
+            if (mouseTimer < 150) {
+                mouseClickedNode = true
+
+                if (king && kingModeW) {
+                    console.log("exiting", mouseTimer, document.body.style.cursor)
+                    reset()
+                }
+            }
+            
+            panOriginX = null
+            document.body.style.cursor = "auto"
+        }
+    }
+
+    function mouseMoveHandler(e) {
+        if (panOriginX != null) {
+            panX = e.clientX - mOffsetX
+            panY = e.clientY - mOffsetY
+
+            setZoomToKing(false)
+            setResetMode(false)
+        }
+        setMouseX(e.clientX - mOffsetX)
+        setMouseY(e.clientY - mOffsetY)
+    }
 </script>
 
 <svelte:window
@@ -566,6 +551,8 @@
     </div>
 
     <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}
+    on:wheel={mouseWheelHandler} on:mousedown={mouseDownHandler}
+    on:mouseup={mouseUpHandler} on:mousemove={mouseMoveHandler}
     ></canvas>
 
     <button
