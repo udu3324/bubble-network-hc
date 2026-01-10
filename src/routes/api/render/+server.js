@@ -1,0 +1,56 @@
+import { PUBLIC_BASE_URL } from '$env/static/public'
+import { supabase } from '$lib/server/supabaseServiceClient'
+import puppeteer from 'puppeteer'
+
+export async function GET({ url }) {
+    const id = url.searchParams.get('id')
+
+    if (!id)
+        return new Response('Missing id', { status: 400 })
+
+    const { error } = await supabase
+        .from('network')
+        .select()
+        .eq('slack_id', id)
+        .single()
+
+    if (error) {
+        if (error.code === "PGRST116") {
+            return new Response(JSON.stringify({
+                error: "id not stored in network"
+            }), { status: 400 })
+        }
+
+        return new Response(JSON.stringify({
+            error: "something bad happened... network db read failed with an error, please report this to someone!",
+            details: error
+        }), { status: 400 })
+    }
+
+    const browser = await puppeteer.launch()
+    const page = await browser.newPage()
+    await page.setViewport({ width: 1280, height: 720 })
+
+    await page.goto(`${PUBLIC_BASE_URL}?id=${id}&bot=true`, { waitUntil: 'networkidle2' })
+
+    const element = await page.waitForSelector("#viewport")
+    await element.evaluate(el => el.scrollIntoView())
+
+    const box = await element.boundingBox()
+
+    const screenshot = await element.screenshot({ 
+        type: 'png',
+        clip: {
+            x: box.x,
+            y: box.y,
+            width: 501,
+            height: 370
+        }
+    })
+
+    await browser.close()
+
+    return new Response(screenshot, {
+        headers: { 'Content-Type': 'image/png' }
+    })
+};

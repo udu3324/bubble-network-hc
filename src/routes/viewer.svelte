@@ -25,14 +25,16 @@
         setPanY,
         mouseTimer,
         setMouseClickedNode,
-
-        slackConnections
-
+        slackConnections,
+        setIsBot,
+        isBot
     } from "$lib/visualizer"
     import { onMount } from "svelte"
 
     import { page } from "$app/stores"
-    import { infoPanelVisible } from "$lib"
+    import { infoPanelVisible, renderIt } from "$lib"
+
+    let overflow = 'overflow-clip'
 
     // svelte element stuff
 
@@ -77,9 +79,16 @@
     let scrolling = false
 
     onMount(() => {
+        setIsBot($page.url.searchParams.get("bot"))
+        if (isBot) {
+            infoPanelVisible.set(false)
+            overflow = ""
+            hintsAreHidden = "hidden"
+        }
+
         console.log("visualizer component mounted")
         
-        if (!localStorage.getItem("hintsHidden")) {
+        if (!localStorage.getItem("hintsHidden") && !isBot) {
             hintsAreHidden = ""
         }
 
@@ -103,6 +112,9 @@
                 if (slackIds.includes(idQuery)) {
                     console.log("autofocus to", idQuery)
                     setKing(slackIds.indexOf(idQuery))
+                    if (isBot) {
+                        renderIt.set(true)
+                    }
                 }
             }
         })
@@ -241,7 +253,7 @@
 
 <div
     bind:this={divis}
-    class="bg-slate-800 select-none grow rounded-lg relative place-content-center overflow-clip"
+    class="bg-slate-800 select-none grow rounded-lg relative place-content-center {overflow}"
 >
     <div class="absolute inset-0 grid place-content-center text-center">
         <!-- <span class="text-slate-600 font-bold text-5xl text-center">network visualizer here</span> -->
@@ -252,7 +264,7 @@
         </span>
     </div>
 
-    <canvas bind:this={canvas} width={canvasWidth} height={canvasHeight}
+    <canvas id="viewport" bind:this={canvas} width={canvasWidth} height={canvasHeight}
     on:wheel={mouseWheelHandler} on:mousedown={mouseDownHandler}
     on:mouseup={mouseUpHandler} on:mousemove={mouseMoveHandler}
     ></canvas>
@@ -266,6 +278,8 @@
         <br />
         <span>scroll - zoom in and out</span>
         <br />
+        <br />
+        <span>&gt; click to hide</span>
     </button>
 
     <div

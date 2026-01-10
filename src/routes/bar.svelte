@@ -1,5 +1,5 @@
 <script>
-    import { infoPanelVisible } from "$lib"
+    import { infoPanelVisible, renderIt } from "$lib"
     import {
         canvas,
         kingModeW,
@@ -10,7 +10,10 @@
         masterData,
         slackConnections,
         originalIds,
-        recenter
+        recenter,
+        ctx,
+        setStopProcessing,
+        isBot
     } from "$lib/visualizer"
 
     let canvasEdit
@@ -126,6 +129,22 @@
         userImage.src = `/api/slack/avatar?url=${masterData[king].profile_picture}`
         context.drawImage(userImage, 5, canvasHeight - 95, 90,90)
 
+        // bot endpoint
+        if (isBot) {
+            setStopProcessing(true)
+            
+            ctx.rect(0, 0, canvas.width, canvas.height)
+            ctx.fillStyle = "white"
+            ctx.fill()
+            ctx.drawImage(
+                canvasEdit,
+                0,
+                0
+            )
+
+            return
+        }
+
         // copy the canvas
         canvasEdit.toBlob(function (blob) {
             const item = new ClipboardItem({ "image/png": blob })
@@ -139,6 +158,12 @@
 
         setCanvas(canvas, prevX, prevY)
     }
+
+    renderIt.subscribe((bool) => {
+        if (bool) {
+            share()
+        }
+    })
 </script>
 
 <canvas
@@ -173,7 +198,7 @@
     >
         <i class="fa-solid fa-expand"></i> Unfocus
     </button>
-
+    
     <button
         disabled={recenterDisabled}
         class="bg-green-600 text-green-100 absolute right-0"

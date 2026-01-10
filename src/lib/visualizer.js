@@ -1,6 +1,15 @@
 import { writable } from "svelte/store"
 import { foobar1, foobar3 } from "./supabaseClient"
 
+export let isBot = false
+export function setIsBot(bool) {
+    isBot = bool
+}
+export let stopProcessing = false
+export function setStopProcessing(bool) {
+    stopProcessing = bool
+}
+
 export let centerX = 0
 export let centerY = 0
 
@@ -78,6 +87,10 @@ export let cameraZoom = 0.05 // higher = zoomed in
 
 let maxPos = 4000
 
+let nodeSmoothMovement = 10
+let cameraZoomSpeed = 30
+let cameraZoomSpeed2 = 10
+
 export let zoomToKing = false // when new focus put camera there
 export function setZoomToKing(bool) {
     zoomToKing = bool
@@ -125,16 +138,6 @@ let prevKing = null
 let mouseClickedNode = false
 export function setMouseClickedNode(bool) {
     mouseClickedNode = bool
-}
-
-let code = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-
-function getTotalFromCode(c) {
-    let total = 0
-    for (let i = 0; i < c.length; i++) {
-        total += Math.abs(code.indexOf(c[i]))
-    } 
-    return total
 }
 
 function cyrb128(str) {
@@ -252,6 +255,13 @@ function doItBetter() {
 
 
 export async function gen() {
+    if (isBot) {
+        df = 1
+        cameraEase = 1
+        nodeSmoothMovement = 1
+        cameraZoomSpeed = 1
+        cameraZoomSpeed2 = 1
+    }
     console.log("generating visualizer")
 
     // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
@@ -310,6 +320,11 @@ export async function gen() {
 
 export function tick(delta) {
     //ticker += delta
+    //console.log(stopProcessing)
+    if (stopProcessing) {
+        //console.log("bot")
+        return
+    }
 
     if (!mapLoaded) {
         return
@@ -377,12 +392,12 @@ export function tick(delta) {
 
     if (zoomToKing) {
         setResetMode(false)
-        cameraZoom += (0.2 - cameraZoom) / 30
+        cameraZoom += (0.2 - cameraZoom) / cameraZoomSpeed
         let tX = nodes[king].pos.x
         let tY = nodes[king].pos.y
 
-        cameraX += (tX - cameraX) / 10
-        cameraY += (tY - cameraY) / 10
+        cameraX += (tX - cameraX) / cameraZoomSpeed2
+        cameraY += (tY - cameraY) / cameraZoomSpeed2
         targetX = cameraX
         targetY = cameraY
     }
@@ -659,14 +674,17 @@ class Node { // id correlates to id in the list of peoples
             if (this.connectionIds.includes(king)) { // move to
                 this.showName()
             } else { // move away
+                if (isBot) {
+                    return
+                }
                 this.pos.x += Math.cos(dir) * 10000 / dist * (1 + kingCircle.length / 10)
                 this.pos.y += Math.sin(dir) * 10000 / dist * (1 + kingCircle.length / 10)
             }
         } else if (king == this.id) {
             this.showName()
         } else { // no king selected, return to init pos
-            this.pos.x += (this.startX - this.pos.x) / 10
-            this.pos.y += (this.startY - this.pos.y) / 10
+            this.pos.x += (this.startX - this.pos.x) / nodeSmoothMovement
+            this.pos.y += (this.startY - this.pos.y) / nodeSmoothMovement
         }
         //alert("h")
         if (!this.touched && taken != null && king != this.id) {
@@ -752,7 +770,7 @@ class Node { // id correlates to id in the list of peoples
         let centerY = nodes[king].pos.y
         let targetX = Math.cos(angle) * radius + centerX
         let targetY = Math.sin(angle) * radius + centerY
-        let speed = (14 + this.shell.children.length / 3)
+        let speed = isBot ? 1 : (14 + this.shell.children.length / 3)
         this.pos.x += (targetX - this.pos.x) / speed
         this.pos.y += (targetY - this.pos.y) / speed
     }

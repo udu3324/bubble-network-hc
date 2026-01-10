@@ -7,3 +7,5 @@ export const isAuthed = writable(false)
 export const hasData = writable(false)
 
 export let infoPanelVisible = writable(true)
+
+export let renderIt = writable(false)
