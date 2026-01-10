@@ -732,6 +732,7 @@ class Node { // id correlates to id in the list of peoples
         // image handling
         if (this.img == null) { // need to load the image
             this.img = new Image()
+            this.img.crossOrigin = "anonymous"
             this.img.src = masterData[this.id].profile_picture
             this.img.onload = () => {
                 this.imgReady = true
