@@ -32,10 +32,8 @@ export async function GET({ url }) {
     const page = await browser.newPage()
     await page.setViewport({ width: 850, height: 500 })
 
-    await page.setRequestInterception(true)
-
     await page.goto(`${PUBLIC_BASE_URL}?id=${id}&bot=true`, { 
-        waitUntil: 'networkidle0'
+        waitUntil: 'domcontentloaded'
     })
 
     const element = await page.waitForSelector("#viewport")
