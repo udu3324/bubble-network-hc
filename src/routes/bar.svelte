@@ -100,7 +100,7 @@
         let displayText = `@${username}`
         context.fillText(displayText, barHeight, canvasHeight - barHeight + 25)
         
-        context.font = "22px Courier"
+        context.font = "22px Nebula Sans"
         displayText =  "has over " + amount + " connections!"
         context.fillText(displayText, barHeight, canvasHeight - barHeight + 50)
 
@@ -110,17 +110,17 @@
 
         // rank + date
         let today = date.getFullYear() + "/" + (1+date.getMonth()) + "/" + date.getDate()
-        context.font = "14px Courier"
+        context.font = "14px Nebula Sans"
         displayText =  "rank #" + rank + "  -  " + today
         context.fillText(displayText, barHeight, canvasHeight - barHeight + 67) // 6.. 6.. 67!!!
 
         // advertisement
         let adShift = 55
         context.fillStyle = "lightblue"
-        context.font = "18px Courier"
+        context.font = "18px Nebula Sans"
         displayText =  "get yours in #bubble"
         context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
-        //context.font = "bold 18px Courier"
+        //context.font = "bold 18px Nebula Sans"
         //displayText =  "             #bubble"
         //context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
 
