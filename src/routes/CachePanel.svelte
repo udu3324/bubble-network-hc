@@ -1,6 +1,6 @@
 <script>
     import { hasData, isAuthed } from "$lib"
-    import { gen } from "$lib/visualizer"
+    import { gen, setKing, slackIds } from "$lib/visualizer"
 
     let output = "..."
     let disableCaching = true
@@ -56,9 +56,10 @@
         disableCaching = false
 
         status = "done"
-        output = `all your connections have been cached, if there's any problems refresh page first`
+        output = `all your connections have been cached. press share to generate an image!`
 
-        gen()
+        await gen()
+        setKing(slackIds.indexOf(localStorage.getItem("user_id").replaceAll("\"", "")))
     }
 </script>
 <div>

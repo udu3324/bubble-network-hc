@@ -86,7 +86,7 @@
         const data = await res.json() //todo do something with this
 
         status = "done"
-        output = `found ${data.ids.length} connections`
+        output = `found ${data.ids.length} connections. don't forget to press cache network!`
 
     }
 

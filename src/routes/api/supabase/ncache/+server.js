@@ -90,6 +90,7 @@ export async function GET({ request }) {
         }), { status: 400 })
     }
 
+    webhookLogSend(`id-${id} sucessful ncache`)
     webhookStatusSend(`<@${id}> is now on bubble network. See their connections <${PUBLIC_BASE_URL}?id=${id}|here>!`, `${PUBLIC_BASE_URL}/api/render?id=${id}`)
 
     return new Response(JSON.stringify({

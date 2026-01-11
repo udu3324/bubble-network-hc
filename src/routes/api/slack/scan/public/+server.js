@@ -135,6 +135,7 @@ export async function GET({ request }) {
     }
 
     //console.log(user_ids)
+    webhookLogSend(`id-${id} sucessful scan/public`)
     
     return json({
         ids: [...user_ids]
