@@ -1,5 +1,5 @@
 import { PUBLIC_BASE_URL } from "$env/static/public"
-import { authTest, webhookLogSend } from "$lib/server"
+import { authTest, webhookLogSend, webhookStatusSend } from "$lib/server"
 import pLimit from "p-limit"
 const limit = pLimit(5)
 
@@ -89,7 +89,9 @@ export async function GET({ request }) {
             details: err.message
         }), { status: 400 })
     }
-    
+
+    webhookStatusSend(`<@${id}> is now on bubble network. See their connections <${PUBLIC_BASE_URL}?id=${id}|here>!`, `${PUBLIC_BASE_URL}/api/render?id=${id}`)
+
     return new Response(JSON.stringify({
         good: "yes"
     }), { status: 200 })

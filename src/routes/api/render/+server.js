@@ -1,9 +1,6 @@
 import { PUBLIC_BASE_URL } from '$env/static/public'
+import { getBrowser } from '$lib/server'
 import { supabase } from '$lib/server/supabaseServiceClient'
-import Chromium from '@sparticuz/chromium'
-import puppeteer from 'puppeteer-core'
-
-const isVercel = !!process.env.VERCEL
 
 export async function GET({ url }) {
     const id = url.searchParams.get('id')
@@ -30,23 +27,14 @@ export async function GET({ url }) {
         }), { status: 400 })
     }
 
-    const browser = await puppeteer.launch(
-        isVercel
-            ? {
-                args: Chromium.args,
-                executablePath: await Chromium.executablePath(),
-                headless: Chromium.headless
-            }
-            : {
-                channel: 'chrome', //local chrome
-                headless: true
-            }
-    )
+    const browser = await getBrowser()
 
     const page = await browser.newPage()
-    await page.setViewport({ width: 1280, height: 720 })
+    await page.setViewport({ width: 850, height: 500 })
 
-    await page.goto(`${PUBLIC_BASE_URL}?id=${id}&bot=true`, { waitUntil: 'networkidle2' })
+    await page.setRequestInterception(true)
+
+    await page.goto(`${PUBLIC_BASE_URL}?id=${id}&bot=true`, { waitUntil: 'domcontentloaded' })
 
     const element = await page.waitForSelector("#viewport")
     await element.evaluate(el => el.scrollIntoView())
@@ -64,7 +52,7 @@ export async function GET({ url }) {
         }
     })
 
-    await browser.close()
+    await page.close()
 
     return new Response(screenshot, {
         headers: { 'Content-Type': 'image/png' }

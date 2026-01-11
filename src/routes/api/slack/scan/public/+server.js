@@ -1,5 +1,4 @@
-import { PUBLIC_BASE_URL } from "$env/static/public"
-import { authTest, webhookLogSend, webhookStatusSend } from "$lib/server"
+import { authTest, webhookLogSend } from "$lib/server"
 import { supabase } from "$lib/server/supabaseServiceClient"
 import { WebClient } from "@slack/web-api"
 import { json } from "@sveltejs/kit"
@@ -136,8 +135,7 @@ export async function GET({ request }) {
     }
 
     //console.log(user_ids)
-    webhookStatusSend(`<@${id}> is now on bubble network. See their *${user_ids.size}* connections <${PUBLIC_BASE_URL}?id=${id}|here>!`)
-
+    
     return json({
         ids: [...user_ids]
     })

@@ -1,5 +1,29 @@
 import { SLACK_ORGANIZATION_ID, SLACK_WEBHOOK_STATUS, SLACK_WEBHOOK_LOGS } from "$env/static/private"
 import { WebClient } from "@slack/web-api"
+import Chromium from "@sparticuz/chromium"
+import puppeteer from "puppeteer-core"
+
+const isVercel = !!process.env.VERCEL
+let browserInstance
+
+export async function getBrowser() {
+  if (!browserInstance) {
+    browserInstance = await puppeteer.launch(
+      isVercel
+        ? {
+                args: Chromium.args,
+                executablePath: await Chromium.executablePath(),
+                headless: Chromium.headless
+            }
+            : {
+                channel: 'chrome', //local chrome
+                headless: true
+            }
+    )
+  }
+  return browserInstance
+}
+
 
 export async function authTest(key, id) {
     const web = new WebClient(key)
@@ -24,14 +48,30 @@ export async function inOrg(key) {
 }
 
 // <3 https://stackoverflow.com/a/47065313/16216937
-export async function webhookStatusSend(message) { //public channel
-    await fetch(SLACK_WEBHOOK_STATUS, {
+export async function webhookStatusSend(message, imageURL) { //public channel
+    let payload = {
         method: "POST",
         headers: {'Content-Type': 'application/json'}, 
         body: JSON.stringify({
-            "text": message
+            "text": message,
+            blocks: [
+                {
+                    type: "section",
+                    text: {
+                        type: "mrkdwn",
+                        text: message
+                    }
+                },
+                {
+                    type: "image",
+                    image_url: imageURL,
+                    alt_text: "network screenshot"
+                }
+            ]
         })
-    }).then(res => {
+    }
+
+    await fetch(SLACK_WEBHOOK_STATUS, payload).then(res => {
         //console.log("Request complete! response:", res);
     })
 }
