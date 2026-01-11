@@ -793,7 +793,7 @@ class Node { // id correlates to id in the list of peoples
             this.img = new Image()
             //this.img.crossOrigin = "anonymous" // REMOVE REMOVE REMOVE REMOVE
             //workaround for cors issue
-            this.img.src = `/api/slack/avatar?url=${masterData[this.id].profile_picture}`
+            this.img.src = `/api/slack/avatar?url=${encodeURIComponent(masterData[this.id].profile_picture)}`
             this.img.onload = () => {
                 this.imgReady = true
             }

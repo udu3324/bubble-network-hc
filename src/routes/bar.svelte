@@ -126,7 +126,7 @@
 
         // draw image
         const userImage = new Image()
-        userImage.src = `/api/slack/avatar?url=${masterData[king].profile_picture}`
+        userImage.src = `/api/slack/avatar?url=${encodeURIComponent(masterData[king].profile_picture)}`
         await new Promise((resolve, reject) => {
             userImage.onload = () => resolve(userImage)
             userImage.onerror = reject
