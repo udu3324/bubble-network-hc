@@ -35,7 +35,7 @@ export async function GET({ url }) {
     await page.setRequestInterception(true)
 
     await page.goto(`${PUBLIC_BASE_URL}?id=${id}&bot=true`, { 
-        waitUntil: 'domcontentloaded',
+        waitUntil: 'commit',
         timeout: 0
     })
 
