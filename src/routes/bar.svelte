@@ -146,6 +146,8 @@
                 0
             )
 
+            window.__readyForScreenshot = true
+
             return
         }
 

@@ -52,6 +52,7 @@ export async function GET({ url }) {
     await element.evaluate(el => el.scrollIntoView())
 
     //await new Promise(resolve => setTimeout(resolve, 1500))
+    await page.waitForFunction(() => window.__readyForScreenshot === true)
 
     const screenshot = await element.screenshot({
         type: 'png',
