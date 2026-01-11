@@ -192,12 +192,14 @@
         {/if}
     </button>
     <button
+        title="recenter the visualizer"
         class="bg-blue-600 text-blue-100"
         on:click={recenter}
     >
         <i class="fa-solid fa-arrows-to-dot"></i> Recenter
     </button>
     <button
+        title="unfocus from a focused view"
         disabled={recenterDisabled}
         class="bg-amber-600 text-amber-100"
         on:click={reset}
@@ -206,6 +208,7 @@
     </button>
     
     <button
+        title="generate a sharable image (works only in focused mode)"
         disabled={recenterDisabled}
         class="bg-green-600 text-green-100 absolute right-0"
         on:click={share}
