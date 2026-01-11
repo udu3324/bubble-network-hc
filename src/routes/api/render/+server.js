@@ -34,7 +34,10 @@ export async function GET({ url }) {
 
     await page.setRequestInterception(true)
 
-    await page.goto(`${PUBLIC_BASE_URL}?id=${id}&bot=true`, { waitUntil: 'domcontentloaded' })
+    await page.goto(`${PUBLIC_BASE_URL}?id=${id}&bot=true`, { 
+        waitUntil: 'domcontentloaded',
+        timeout: 0
+    })
 
     const element = await page.waitForSelector("#viewport")
     await element.evaluate(el => el.scrollIntoView())
