@@ -104,9 +104,9 @@
         displayText =  "has over " + amount + " connections!"
         context.fillText(displayText, barHeight, canvasHeight - barHeight + 50)
 
-        context.font = "bold 22px Courier"
-        displayText =  "         " + amount
-        context.fillText(displayText, barHeight, canvasHeight - barHeight + 50)
+        //context.font = "bold 22px Courier"
+        //displayText =  "         " + amount
+        //context.fillText(displayText, barHeight, canvasHeight - barHeight + 50)
 
         // rank + date
         let today = date.getFullYear() + "/" + (1+date.getMonth()) + "/" + date.getDate()
@@ -118,11 +118,11 @@
         let adShift = 55
         context.fillStyle = "lightblue"
         context.font = "18px Courier"
-        displayText =  "get yours in"
+        displayText =  "get yours in #bubble"
         context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
-        context.font = "bold 18px Courier"
-        displayText =  "             #bubble"
-        context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
+        //context.font = "bold 18px Courier"
+        //displayText =  "             #bubble"
+        //context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
 
         // draw image
         const userImage = new Image()
