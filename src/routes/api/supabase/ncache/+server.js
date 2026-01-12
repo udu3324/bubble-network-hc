@@ -1,5 +1,6 @@
 import { PUBLIC_BASE_URL } from "$env/static/public"
 import { authTest, webhookLogSend, webhookStatusSend } from "$lib/server"
+import { supabase } from "$lib/server/supabaseServiceClient"
 import pLimit from "p-limit"
 const limit = pLimit(5)
 
@@ -45,6 +46,21 @@ export async function GET({ request }) {
             }), { status: 400 })
     }
 
+    //prefetch already cached avatars //todo date overwrite
+    const data2 = await supabase
+            .from('cache')
+            .select()
+    
+    if (data2.error) {
+        webhookLogSend(`id-${id} failed ncache pre cache lookup`)
+
+        return new Response(JSON.stringify({
+                error: "failed to read cache table, please report this to someone!",
+            }), { status: 400 })
+    }
+
+    const currentCache = data2.data
+
     const data = await res.json()
 
     const id_list = data.id_list
@@ -66,6 +82,12 @@ export async function GET({ request }) {
             // bots break?
             if (id.startsWith('B')) {
                 //console.log("AAAAAAAA")
+                return
+            }
+
+            //check if id had already been cached
+            if (currentCache.some(row => row.slack_id === id)) {
+                //todo date check overwrite
                 return
             }
 
