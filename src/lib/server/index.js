@@ -7,28 +7,28 @@ const isVercel = !!process.env.VERCEL
 let browserInstance
 
 export async function getBrowser() {
-  if (!browserInstance) {
-    browserInstance = await puppeteer.launch(
-      isVercel
-        ? {
-                args: Chromium.args,
-                executablePath: await Chromium.executablePath(),
-                headless: Chromium.headless
-            }
-            : {
-                channel: 'chrome', //local chrome
-                headless: true
-            }
-    )
-  }
-  return browserInstance
+    if (!browserInstance) {
+        browserInstance = await puppeteer.launch(
+            isVercel
+                ? {
+                    args: Chromium.args,
+                    executablePath: await Chromium.executablePath(),
+                    headless: Chromium.headless
+                }
+                : {
+                    channel: 'chrome', //local chrome
+                    headless: true
+                }
+        )
+    }
+    return browserInstance
 }
 
 
 export async function authTest(key, id) {
     const web = new WebClient(key)
     const profileRes = await web.auth.test()
-    
+
     if (id === profileRes.user_id) {
         return true
     }
@@ -39,7 +39,7 @@ export async function authTest(key, id) {
 export async function inOrg(key) {
     const web = new WebClient(key)
     const profileRes = await web.auth.test()
-    
+
     if (profileRes.team_id === SLACK_ORGANIZATION_ID) {
         return true
     }
@@ -49,37 +49,34 @@ export async function inOrg(key) {
 
 // <3 https://stackoverflow.com/a/47065313/16216937
 export async function webhookStatusSend(message, imageURL) { //public channel
-    let payload = {
-        method: "POST",
-        headers: {'Content-Type': 'application/json'}, 
-        body: JSON.stringify({
-            "text": message,
-            blocks: [
-                {
-                    type: "section",
-                    text: {
-                        type: "mrkdwn",
-                        text: message
-                    }
-                },
-                {
-                    type: "image",
-                    image_url: imageURL,
-                    alt_text: "network screenshot"
-                }
-            ]
+    const blocks = [{
+        type: "section",
+        text: {
+            type: "mrkdwn",
+            text: message
+        }
+    },
+    ]
+
+    if (imageURL) {
+        blocks.push({
+            type: "image",
+            image_url: imageURL,
+            alt_text: "network screenshot"
         })
     }
 
-    await fetch(SLACK_WEBHOOK_STATUS, payload).then(res => {
-        //console.log("Request complete! response:", res);
+    await fetch(SLACK_WEBHOOK_STATUS, {
+        method: "POST",
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: message, blocks })
     })
 }
 
 export async function webhookLogSend(message) { //private
     await fetch(SLACK_WEBHOOK_LOGS, {
         method: "POST",
-        headers: {'Content-Type': 'application/json'}, 
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             "text": `\`${new Date().toUTCString()}\` ${sanitize(message)}`
         })

@@ -91,8 +91,9 @@ export async function GET({ request }) {
     }
 
     webhookLogSend(`id-${id} sucessful ncache`)
-    webhookStatusSend(`<@${id}> is now on bubble network. See their connections <${PUBLIC_BASE_URL}?id=${id}|here>!`, `${PUBLIC_BASE_URL}/api/render?id=${id}`)
-
+    //webhookStatusSend(`<@${id}> is now on bubble network. See their connections <${PUBLIC_BASE_URL}?id=${id}|here>!`, `${PUBLIC_BASE_URL}/api/render?id=${id}`)
+    webhookStatusSend(`<@${id}> is now on bubble network. See their connections <${PUBLIC_BASE_URL}?id=${id}|here>!`)
+    
     return new Response(JSON.stringify({
         good: "yes"
     }), { status: 200 })
