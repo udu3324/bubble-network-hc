@@ -71,7 +71,9 @@ export let slackConnections = []
 export let king = null
 export function setKing(i) {
     king = i
+    updateInfoBox.update(n => n + 1)
 }
+export let updateInfoBox = writable(0)
 
 export let kingShells = [] // shells to hold the nodes
 let kingStrengths = []
@@ -189,7 +191,7 @@ function posY(y) {
 }
 
 export function reset() {
-    king = null
+    setKing(null)
     setKingMode(false)
     zoomToKing = false
     zoomedToKing.set(zoomToKing)
@@ -448,8 +450,8 @@ function surroundNodes() {
     }
 }
 
-export let circleTouching = false;
-export let circleTouched = null;
+export let circleTouching = false
+export let circleTouched = null
 
 function displayNodes() {
     //alert("h")
@@ -479,8 +481,8 @@ function displayNodes() {
         temp.display()
     }
 
-    circleTouching = circle != null;
-    circleTouched = circle;
+    circleTouching = circle != null
+    circleTouched = circle
 
     // do not draw info box while panning, smooth mode causes flashing
     if (document.body.style.cursor === "grab") {
@@ -756,7 +758,7 @@ class Node { // id correlates to id in the list of peoples
             }
         }
         if (king == null && this.touched && mouseDown || (this.touched && mouseClickedNode)) {
-            king = this.id
+            setKing(this.id)
         }
         this.circleTouched = false
         // when in king mode hovering and stuff you know the drill

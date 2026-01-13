@@ -29,7 +29,8 @@
         setIsBot,
         isBot,
         circleTouching,
-        circleTouched
+        circleTouched,
+        updateInfoBox
     } from "$lib/visualizer"
     import { onMount } from "svelte"
 
@@ -137,8 +138,8 @@
         infoHiddenOverride = bool ? "" : "hidden"
     })
 
-    kingModeW.subscribe((zoomed) => {
-        if (zoomed) {
+    updateInfoBox.subscribe(() => {
+        if (king) {
             //reset info
             infoUsername = ""
             infoSlackID = ""
@@ -229,9 +230,8 @@
                         console.log("exiting", mouseTimer, document.body.style.cursor)
                         reset()
                     } else {
-                        setKing(circleTouched);
+                        setKing(circleTouched)
                     }
-                    
                 }
             }
             
