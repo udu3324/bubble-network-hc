@@ -448,6 +448,9 @@ function surroundNodes() {
     }
 }
 
+export let circleTouching = false;
+export let circleTouched = null;
+
 function displayNodes() {
     //alert("h")
     let guyTouched = null
@@ -475,6 +478,9 @@ function displayNodes() {
         let temp = nodes[i]
         temp.display()
     }
+
+    circleTouching = circle != null;
+    circleTouched = circle;
 
     // do not draw info box while panning, smooth mode causes flashing
     if (document.body.style.cursor === "grab") {

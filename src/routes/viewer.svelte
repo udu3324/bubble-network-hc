@@ -27,7 +27,9 @@
         setMouseClickedNode,
         slackConnections,
         setIsBot,
-        isBot
+        isBot,
+        circleTouching,
+        circleTouched
     } from "$lib/visualizer"
     import { onMount } from "svelte"
 
@@ -223,8 +225,13 @@
                 setMouseClickedNode(true)
 
                 if (king && kingModeW) {
-                    console.log("exiting", mouseTimer, document.body.style.cursor)
-                    reset()
+                    if (!circleTouching) {
+                        console.log("exiting", mouseTimer, document.body.style.cursor)
+                        reset()
+                    } else {
+                        setKing(circleTouched);
+                    }
+                    
                 }
             }
             
