@@ -3,6 +3,10 @@ import { getBrowser } from '$lib/server'
 import { supabase } from '$lib/server/supabaseServiceClient'
 
 export async function GET({ url }) {
+    return new Response(JSON.stringify({
+                error: "endpoint down temporarily"
+            }), { status: 503 })
+
     const id = url.searchParams.get('id')
 
     if (!id)
