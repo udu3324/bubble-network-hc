@@ -277,7 +277,7 @@ export async function gen() {
     doItBetter()
     //return;
     // DERIVE IDS, CONNECTIONS FROM MASTER
-    maxPos = 2000 + slackIds.length * 8
+    maxPos = 2000 + slackIds.length * 10
 
     // Eleminate any ids in connections that don't exist
     for (let i = 0; i < slackConnections.length; i++) {
@@ -346,9 +346,9 @@ export function tick(delta) {
     cameraZoom += ds
     ds *= df
 
-    if (cameraZoom < 0.01) {
+    if (cameraZoom < 0.008) {
         // max zoom out
-        cameraZoom = 0.01
+        cameraZoom = 0.008
         ds = 0
     }
     if (cameraZoom > 10) {
@@ -594,8 +594,9 @@ class Node { // id correlates to id in the list of peoples
             let breaker = true
             for (let i = 0; i < nodes.length; i++) {
                 let temp = nodes[i]
-                if (Math.sqrt(Math.pow(temp.pos.x - this.pos.x, 2) + Math.pow(temp.pos.y - this.pos.y, 2)) <= (this.rad + temp.rad) * 2) {
+                if (Math.sqrt(Math.pow(temp.pos.x - this.pos.x, 2) + Math.pow(temp.pos.y - this.pos.y, 2)) <= (this.rad + temp.rad) * 2 + 1.25 * (this.connections.length + temp.connections.length) ) {
                     breaker = false
+                    break;
                 }
             }
             if (breaker) { // NOT WORKING
@@ -657,7 +658,7 @@ class Node { // id correlates to id in the list of peoples
         if (this.inRange()) {
             ctx.globalAlpha = this.lineFade
             if (this.lineFade > 0.01) {
-                if (this.inZoom() || king == this.id) { // zooming out prioritizes people with larger connections
+                if (this.inZoom() || king == this.id || this.touched) { // zooming out prioritizes people with larger connections
                     if (king == this.id || (this.touched && king == null)) {
                         for (let i = 0; i < this.connectionLines.length; i++) { // show all connections yipee
                             this.connectionLines[i].display(this.color, (this.touched || king == this.id))
@@ -729,7 +730,7 @@ class Node { // id correlates to id in the list of peoples
         return false
     }
     inZoom() { // zooming out prioritizes nodes w/ larger connections
-        let visibility = 0
+        let visibility = 70
         return Math.pow(this.connectionLines.length, 2) > Math.pow(visibility, 2) / cameraZoom
     }
     showName() {
