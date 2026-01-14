@@ -2,7 +2,7 @@ import { writable } from "svelte/store"
 import { foobar1, foobar3 } from "./supabaseClient"
 import { modifyURLParams } from "$lib"
 
-export let visibility = 70 //100 - all, 0 - none
+export let visibility = 50 //100 - all, 0 - none
 export let renderConnectionsOutsideCanvas = false
 export function setPreformance(i, bool) {
     visibility = i
