@@ -1,4 +1,5 @@
 <script>
+    import { page } from "$app/stores"
     import { infoPanelVisible, renderIt } from "$lib"
     import {
         canvas,
@@ -35,6 +36,12 @@
 
     let prevX = 0
     let prevY = 0
+
+    function url() {
+        navigator.clipboard.writeText($page.url)
+
+        setTimeout(function() { alert("Copied link to clipboard.\n\nGenerate a sharable image next!") }, 1)
+    }
 
     function share() {
         if (!navigator.clipboard || !window.ClipboardItem) {
@@ -207,14 +214,24 @@
         <i class="fa-solid fa-expand"></i> Unfocus
     </button>
     
-    <button
-        title="generate a sharable image (works only in focused mode)"
-        disabled={recenterDisabled}
-        class="bg-green-600 text-green-100 absolute right-0"
-        on:click={share}
-    >
-        <i class="fa-solid fa-share"></i> Share
-    </button>
+    <div class="absolute right-0 space-x-2">
+        <button
+            title="copy the link to this focused bubble"
+            disabled={recenterDisabled}
+            class="bg-green-600 text-green-100"
+            on:click={url}
+        >
+            <i class="fa-solid fa-link"></i> Link
+        </button>
+        <button
+            title="generate a sharable image (works only in focused mode)"
+            disabled={recenterDisabled}
+            class="bg-green-600 text-green-100"
+            on:click={share}
+        >
+            <i class="fa-solid fa-image"></i> Image
+        </button>
+    </div>
 </div>
 
 <style lang="postcss">

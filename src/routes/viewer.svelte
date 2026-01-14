@@ -30,12 +30,13 @@
         isBot,
         circleTouching,
         circleTouched,
-        updateInfoBox
+        updateInfoBox,
     } from "$lib/visualizer"
     import { onMount } from "svelte"
 
     import { page } from "$app/stores"
-    import { infoPanelVisible, renderIt } from "$lib"
+    import { infoPanelVisible, modifyURLParams, renderIt } from "$lib"
+    import { browser } from "$app/environment"
 
     let overflow = 'overflow-clip'
 
@@ -139,6 +140,10 @@
     })
 
     updateInfoBox.subscribe(() => {
+        if (!browser) {
+            return //history object may not be available
+        }
+
         if (king) {
             //reset info
             infoUsername = ""
@@ -169,6 +174,8 @@
                 infoScanned = "false"
                 infoRank = "n/a"
             }
+
+            modifyURLParams(infoSlackID)
         } else {
             infoIsHidden = "hidden"
         }
@@ -229,6 +236,8 @@
                     if (!circleTouching) {
                         console.log("exiting", mouseTimer, document.body.style.cursor)
                         reset()
+
+                        modifyURLParams(undefined)
                     } else {
                         setKing(circleTouched)
                     }

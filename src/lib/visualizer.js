@@ -1,5 +1,13 @@
 import { writable } from "svelte/store"
 import { foobar1, foobar3 } from "./supabaseClient"
+import { modifyURLParams } from "$lib"
+
+export let visibility = 70 //100 - all, 0 - none
+export let renderConnectionsOutsideCanvas = false
+export function setPreformance(i, bool) {
+    visibility = i
+    renderConnectionsOutsideCanvas = bool
+}
 
 export let isBot = false
 export function setIsBot(bool) {
@@ -196,6 +204,8 @@ export function reset() {
     zoomToKing = false
     zoomedToKing.set(zoomToKing)
     setResetMode(true)
+
+    modifyURLParams(undefined)
 }
 
 export function recenter() {
@@ -596,7 +606,7 @@ class Node { // id correlates to id in the list of peoples
                 let temp = nodes[i]
                 if (Math.sqrt(Math.pow(temp.pos.x - this.pos.x, 2) + Math.pow(temp.pos.y - this.pos.y, 2)) <= (this.rad + temp.rad) * 2 + 1.25 * (this.connections.length + temp.connections.length) ) {
                     breaker = false
-                    break;
+                    break
                 }
             }
             if (breaker) { // NOT WORKING
@@ -722,6 +732,9 @@ class Node { // id correlates to id in the list of peoples
         if (king == this.id) {
             return true
         }
+        if (renderConnectionsOutsideCanvas) {
+            return true
+        }
         if (posX(this.pos.x) <= canvas.width + this.rad * cameraZoom * 4 && posX(this.pos.x) >= 0 - this.rad * cameraZoom * 4) {
             if (posY(this.pos.y) <= canvas.height + this.rad * cameraZoom * 4 && posY(this.pos.y) >= 0 - this.rad * cameraZoom * 4) {
                 return true
@@ -730,8 +743,7 @@ class Node { // id correlates to id in the list of peoples
         return false
     }
     inZoom() { // zooming out prioritizes nodes w/ larger connections
-        let visibility = 70
-        return Math.pow(this.connectionLines.length, 2) > Math.pow(visibility, 2) / cameraZoom
+        return Math.pow(this.connectionLines.length, 2) > Math.pow((100-visibility), 2) / cameraZoom
     }
     showName() {
 
