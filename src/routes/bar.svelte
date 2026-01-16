@@ -1,6 +1,6 @@
 <script>
     import { page } from "$app/stores"
-    import { infoPanelVisible, renderIt } from "$lib"
+    import { renderIt, settingsPanelVisiblie } from "$lib"
     import {
         canvas,
         kingModeW,
@@ -16,6 +16,7 @@
         setStopProcessing,
         isBot
     } from "$lib/visualizer"
+    import SearchTab from "./SearchBar.svelte"
 
     let canvasEdit
     let context
@@ -28,11 +29,6 @@
     kingModeW.subscribe((zoomed) => {
         recenterDisabled = !zoomed
     })
-
-    function toggleInfoPanel() {
-        console.log(infoPanelVisible)
-        infoPanelVisible.update((bool) => !bool)
-    }
 
     let prevX = 0
     let prevY = 0
@@ -190,13 +186,9 @@
     <button
         title="toggle info panel"
         class="bg-stone-600 text-stone-100"
-        on:click={toggleInfoPanel}
+        on:click={() => settingsPanelVisiblie.update(v => !v)}
     >
-        {#if $infoPanelVisible}
-            <i class="fa-solid fa-circle-info"></i>
-        {:else}
-            <i class="fa-solid fa-eye-slash"></i>
-        {/if}
+        <i class="fa-solid fa-cog"></i>
     </button>
     <button
         title="recenter the visualizer"
@@ -213,6 +205,8 @@
     >
         <i class="fa-solid fa-expand"></i> Unfocus
     </button>
+
+    <!--<SearchTab/>-->
     
     <div class="absolute right-0 space-x-2">
         <button
@@ -229,7 +223,7 @@
             class="bg-green-600 text-green-100"
             on:click={share}
         >
-            <i class="fa-solid fa-image"></i> Image
+            <i class="fa-solid fa-image"></i> Share
         </button>
     </div>
 </div>

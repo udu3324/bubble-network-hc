@@ -35,8 +35,9 @@
     import { onMount } from "svelte"
 
     import { page } from "$app/stores"
-    import { infoPanelVisible, modifyURLParams, renderIt } from "$lib"
+    import { infoPanelVisible, isGrabbing, modifyURLParams, renderIt } from "$lib"
     import { browser } from "$app/environment"
+    import ConfigPanel from "./ConfigPanel.svelte";
 
     let overflow = 'overflow-clip'
 
@@ -223,6 +224,7 @@
             setResetMode(false)
 
             document.body.style.cursor = "grab"
+            isGrabbing.set(true)
         }
     }
 
@@ -246,6 +248,7 @@
             
             setPanOriginX(null)
             document.body.style.cursor = "auto"
+            isGrabbing.set(false)
         }
     }
 
@@ -279,6 +282,8 @@
             <i class="fa-solid fa-spinner animate-spin text-9xl mt-5"></i>
         </span>
     </div>
+    
+    <ConfigPanel/>
 
     <canvas id="viewport" bind:this={canvas} width={canvasWidth} height={canvasHeight}
     on:wheel={mouseWheelHandler} on:mousedown={mouseDownHandler}
