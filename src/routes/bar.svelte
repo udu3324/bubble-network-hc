@@ -206,7 +206,7 @@
         <i class="fa-solid fa-expand"></i> Unfocus
     </button>
 
-    <!--<SearchTab/>-->
+    <SearchTab/>
     
     <div class="absolute right-0 space-x-2">
         <button

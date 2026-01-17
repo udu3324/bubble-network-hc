@@ -145,7 +145,7 @@
             return //history object may not be available
         }
 
-        if (king) {
+        if (typeof king === "number") {
             //reset info
             infoUsername = ""
             infoSlackID = ""
@@ -234,7 +234,7 @@
             if (mouseTimer < 150) {
                 setMouseClickedNode(true)
 
-                if (king && kingModeW) {
+                if ((typeof king === "number") && kingModeW) {
                     if (!circleTouching) {
                         console.log("exiting", mouseTimer, document.body.style.cursor)
                         reset()
