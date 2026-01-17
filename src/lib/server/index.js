@@ -1,28 +1,5 @@
 import { SLACK_ORGANIZATION_ID, SLACK_WEBHOOK_STATUS, SLACK_WEBHOOK_LOGS } from "$env/static/private"
 import { WebClient } from "@slack/web-api"
-import Chromium from "@sparticuz/chromium"
-import puppeteer from "puppeteer-core"
-
-const isVercel = !!process.env.VERCEL
-let browserInstance
-
-export async function getBrowser() {
-    if (!browserInstance) {
-        browserInstance = await puppeteer.launch(
-            isVercel
-                ? {
-                    args: Chromium.args,
-                    executablePath: await Chromium.executablePath(),
-                    headless: Chromium.headless
-                }
-                : {
-                    channel: 'chrome', //local chrome
-                    headless: true
-                }
-        )
-    }
-    return browserInstance
-}
 
 
 export async function authTest(key, id) {
@@ -80,6 +57,7 @@ export async function webhookLogSend(message) { //private
         body: JSON.stringify({
             "text": `\`${new Date().toUTCString()}\` ${sanitize(message)}`
         })
+    // eslint-disable-next-line no-unused-vars
     }).then(res => {
         //console.log("Request complete! response:", res);
     })

@@ -1,64 +1,128 @@
 import { PUBLIC_BASE_URL } from '$env/static/public'
-import { getBrowser } from '$lib/server'
-import { supabase } from '$lib/server/supabaseServiceClient'
+import { camera, gen, render, setCanvas, setKing } from '$lib/server/simpleVisualizer'
+import { foobar1, foobar3 } from '$lib/supabaseClient'
+import { createCanvas, loadImage } from 'canvas'
+
+const canvasWidth = 501
+const canvasHeight = 370
 
 export async function GET({ url }) {
-    return new Response(JSON.stringify({
-                error: "endpoint down temporarily"
-            }), { status: 503 })
 
     const id = url.searchParams.get('id')
 
     if (!id)
         return new Response('Missing id', { status: 400 })
 
-    const { error } = await supabase
-        .from('network')
-        .select()
-        .eq('slack_id', id)
-        .single()
+    const masterArray = await foobar1()
 
-    if (error) {
-        if (error.code === "PGRST116") {
-            return new Response(JSON.stringify({
-                error: "id not stored in network"
-            }), { status: 400 })
-        }
+    const bubble = masterArray.find(u => u.slack_id === id)
 
+    if (!bubble) {
         return new Response(JSON.stringify({
-            error: "something bad happened... network db read failed with an error, please report this to someone!",
-            details: error
+            error: "id not stored in network"
         }), { status: 400 })
     }
 
-    const browser = await getBrowser()
+    const masterData = await foobar3()
 
-    const page = await browser.newPage()
-    await page.setViewport({ width: 850, height: 500 })
+    const res = await fetch(`${PUBLIC_BASE_URL}/api/supabase/cache?id=${id}`)
 
-    await page.goto(`${PUBLIC_BASE_URL}?id=${id}&bot=true`, { 
-        waitUntil: 'domcontentloaded'
-    })
+    if (!res.ok) {
+        return new Response(JSON.stringify({
+            error: "could not find cache of this user"
+        }), { status: 400 })
+    }
 
-    const element = await page.waitForSelector("#viewport")
-    await element.evaluate(el => el.scrollIntoView())
+    const data = await res.json()
 
-    //await new Promise(resolve => setTimeout(resolve, 1500))
-    await page.waitForFunction(() => window.__readyForScreenshot === true)
 
-    const screenshot = await element.screenshot({
-        type: 'png',
-        clip: {
-            x: 0,
-            y: 0,
-            width: 501,
-            height: 370
+    //optimize masterData
+    let optimizedData = []
+    masterData.forEach(cache => {
+        if (bubble.id_list.includes(cache.slack_id)) {
+            optimizedData.push(cache)
         }
     })
 
-    await page.close()
+    //canvas
+    const canvasNetwork = createCanvas(canvasWidth, canvasHeight)
+    //const ctxNetwork = canvasNetwork.getContext('2d')
+    setCanvas(canvasNetwork, canvasWidth, canvasHeight)
+    
+    await gen([bubble], optimizedData)
+    setKing(0)
+    camera.zoom = 0.1
 
-    return new Response(screenshot, {
+    render()
+
+    const canvasShare = createCanvas(canvasWidth, canvasHeight)
+    const ctxShare = canvasShare.getContext('2d')
+
+    // calculate date
+    let date = new Date()
+
+    ctxShare.drawImage(
+        canvasNetwork,
+        0,
+        0,
+        canvasWidth,
+        canvasHeight,
+        0,
+        0,
+        canvasWidth,
+        canvasHeight,
+    )
+
+    // calculate rank
+    let rank = masterArray.indexOf(bubble) + 1
+    if (rank <= 0) {
+        rank = "N/A"
+    }
+
+    // draw the bar
+    let barHeight = 100
+
+    ctxShare.fillStyle = "#050a17"
+    ctxShare.fillRect(0, canvasHeight - barHeight, canvasWidth, barHeight)
+
+    // info text
+    ctxShare.font = "bold 22px Nebula Sans"
+    ctxShare.fillStyle = "white"
+    let displayText = `@${data.username}`
+    ctxShare.fillText(displayText, barHeight, canvasHeight - barHeight + 25)
+    
+    ctxShare.font = "22px Nebula Sans"
+    displayText =  "has over " + bubble.id_list.length + " connections!"
+    ctxShare.fillText(displayText, barHeight, canvasHeight - barHeight + 50)
+
+    //context.font = "bold 22px Courier"
+    //displayText =  "         " + amount
+    //context.fillText(displayText, barHeight, canvasHeight - barHeight + 50)
+
+    // rank + date
+    let today = date.getFullYear() + "/" + (1+date.getMonth()) + "/" + date.getDate()
+    ctxShare.font = "14px Nebula Sans"
+    displayText =  "rank #" + rank + "  -  " + today
+    ctxShare.fillText(displayText, barHeight, canvasHeight - barHeight + 67) // 6.. 6.. 67!!!
+
+    // advertisement
+    let adShift = 55
+    ctxShare.fillStyle = "lightblue"
+    ctxShare.font = "18px Nebula Sans"
+    displayText =  "get yours in #bubble"
+    ctxShare.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
+    //context.font = "bold 18px Nebula Sans"
+    //displayText =  "             #bubble"
+    //context.fillText(displayText, barHeight+adShift, canvasHeight - barHeight + 90) 
+
+    // draw image
+    await loadImage(data.profile_picture).then((image) => {
+        ctxShare.drawImage(image, 5, canvasHeight - 95, 90,90)
+    })
+
+    const buffer = await canvasShare.toBuffer('image/png')
+
+    return new Response(buffer, {
         headers: { 'Content-Type': 'image/png' }
     })
 };

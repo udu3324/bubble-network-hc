@@ -1,6 +1,6 @@
 <script>
     import {
-        cameraZoom,
+        camera,
         king,
         masterData,
         setCanvas,
@@ -26,8 +26,6 @@
         mouseTimer,
         setMouseClickedNode,
         slackConnections,
-        setIsBot,
-        isBot,
         circleTouching,
         circleTouched,
         updateInfoBox,
@@ -35,9 +33,9 @@
     import { onMount } from "svelte"
 
     import { page } from "$app/stores"
-    import { infoPanelVisible, isGrabbing, modifyURLParams, renderIt } from "$lib"
+    import { infoPanelVisible, isGrabbing, modifyURLParams } from "$lib"
     import { browser } from "$app/environment"
-    import ConfigPanel from "./ConfigPanel.svelte";
+    import ConfigPanel from "./ConfigPanel.svelte"
 
     let overflow = 'overflow-clip'
 
@@ -84,16 +82,10 @@
     let scrolling = false
 
     onMount(() => {
-        setIsBot($page.url.searchParams.get("bot"))
-        if (isBot) {
-            infoPanelVisible.set(false)
-            overflow = ""
-            hintsAreHidden = "hidden"
-        }
 
         console.log("visualizer component mounted")
         
-        if (!localStorage.getItem("hintsHidden") && !isBot) {
+        if (!localStorage.getItem("hintsHidden")) {
             hintsAreHidden = ""
         }
 
@@ -117,9 +109,6 @@
                 if (slackIds.includes(idQuery)) {
                     console.log("autofocus to", idQuery)
                     setKing(slackIds.indexOf(idQuery))
-                    if (isBot) {
-                        renderIt.set(true)
-                    }
                 }
             }
         })
@@ -202,11 +191,11 @@
         if (event.deltaY > 0) {
             // zoom out
             //cameraZoom -= cameraZoom/10
-            setDS(0 - cameraZoom / 10)
+            setDS(0 - camera.zoom / 10)
         } else if (event.deltaY < 0) {
             // zoom in
             //cameraZoom += cameraZoom/10
-            setDS(cameraZoom / 10)
+            setDS(camera.zoom / 10)
         }
     }
 

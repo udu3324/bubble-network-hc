@@ -79,7 +79,7 @@
                 {#each results as node, i}
                 <tr on:click={() => sendTo(node.user)} class="cursor-pointer">
                     <td>
-                        <img alt="profile picture" loading="lazy" src={getProfilePicture(node.user)}>
+                        <img alt="profile" loading="lazy" src={getProfilePicture(node.user)}>
                     </td>
                     <td>
                         <div class="pl-1 pr-2">

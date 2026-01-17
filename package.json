@@ -32,8 +32,8 @@
 		"@slack/webhook": "^7.0.6",
 		"@sparticuz/chromium": "^143.0.4",
 		"@supabase/supabase-js": "^2.84.0",
+		"canvas": "^3.2.1",
 		"event-source-polyfill": "^1.0.31",
-		"p-limit": "^7.2.0",
-		"puppeteer-core": "^24.34.0"
+		"p-limit": "^7.2.0"
 	}
 }

@@ -1,6 +1,6 @@
 <script>
     import { page } from "$app/stores"
-    import { renderIt, settingsPanelVisiblie } from "$lib"
+    import { settingsPanelVisiblie } from "$lib"
     import {
         canvas,
         kingModeW,
@@ -11,10 +11,7 @@
         masterData,
         slackConnections,
         originalIds,
-        recenter,
-        ctx,
-        setStopProcessing,
-        isBot
+        recenter
     } from "$lib/visualizer"
     import SearchTab from "./SearchBar.svelte"
 
@@ -136,24 +133,6 @@
         })
         context.drawImage(userImage, 5, canvasHeight - 95, 90,90)
 
-        // bot endpoint
-        if (isBot) {
-            setStopProcessing(true)
-            
-            ctx.rect(0, 0, canvas.width, canvas.height)
-            ctx.fillStyle = "white"
-            ctx.fill()
-            ctx.drawImage(
-                canvasEdit,
-                0,
-                0
-            )
-
-            window.__readyForScreenshot = true
-
-            return
-        }
-
         // copy the canvas
         canvasEdit.toBlob(function (blob) {
             const item = new ClipboardItem({ "image/png": blob })
@@ -167,12 +146,6 @@
 
         setCanvas(canvas, prevX, prevY)
     }
-
-    renderIt.subscribe((bool) => {
-        if (bool) {
-            share()
-        }
-    })
 </script>
 
 <canvas

@@ -14,8 +14,6 @@ export let isGrabbing = writable(false)
 export let settingsPanelVisiblie = writable(false)
 export let infoPanelVisible = writable(true)
 
-export let renderIt = writable(false)
-
 export function modifyURLParams(id) {
     const url = new URL(page.url)
 
