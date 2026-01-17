@@ -26,7 +26,7 @@
 
         //console.log("searching", value)
         nodes.forEach(node => {
-            if (node.displayName.includes(value)) {
+            if (node.displayName.toLowerCase().includes(value.toLowerCase())) {
                 results.push(node)
             }
         })
