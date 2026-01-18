@@ -4,15 +4,21 @@ import { foobar1, foobar3 } from '$lib/supabaseClient'
 import { createCanvas, loadImage, registerFont } from 'canvas'
 import path from 'path'
 
-registerFont(
-    path.resolve('./src/lib/fonts', 'NebulaSans-Book.ttf'), 
-    { family: "Nebula Sans", weight: "normal" }
-)
+const bookFontPath = path.resolve(process.cwd(), 'static/fonts/NebulaSans-Book.ttf')
+const boldFontPath = path.resolve(process.cwd(), 'static/fonts/NebulaSans-Bold.ttf')
 
-registerFont(
-    path.resolve('./src/lib/fonts', 'NebulaSans-Bold.ttf'),
-    { family: "Nebula Sans", weight: "bold" }
-)
+console.log('Registering Book font from:', bookFontPath)
+console.log('Registering Bold font from:', boldFontPath)
+
+registerFont(bookFontPath, {
+    family: 'Nebula Sans',
+    weight: 'normal',
+})
+
+registerFont(boldFontPath, {
+    family: 'Nebula Sans',
+    weight: 'bold',
+})
 
 const canvasWidth = 501
 const canvasHeight = 370
