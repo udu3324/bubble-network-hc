@@ -1,22 +1,12 @@
-export let visibility = 100
+let visibility = 100
 
-export let centerX = 0
-export let centerY = 0
+let centerX = 0
+let centerY = 0
 
-export function setCenters(x, y) { 
-    centerX = x
-    centerY = y
-}
+let kingCircle = []
 
-export let kingCircle = []
-
-export let kingMode = false
-export function setKingMode(i) {
-    kingMode = i
-}
-
-export let canvas
-export let ctx
+let canvas
+let ctx
 
 export function setCanvas(canv, width, height) {
     canvas = canv
@@ -31,24 +21,23 @@ export function setCanvas(canv, width, height) {
 // for hovering
 let taken = null // will be set to id of node getting touched innapropriately
 
-export let nodes = [] // one node for every user
-export let masterData = [] // {slackid, username, profile} username = display name
-export let masterArray = []
+let nodes = [] // one node for every user
+let masterData = [] // {slackid, username, profile} username = display name
+let masterArray = []
 
-export let slackIds = []
-export let slackConnections = []
+let slackIds = []
+let slackConnections = []
 
-export let king = null
+let king = null
 export function setKing(i) {
     if (king !== i) {
         king = i
-        kingMode = true
         zoomToKing = true
         assembleKing()
     }
 }
 
-export let kingShells = [] // shells to hold the nodes
+let kingShells = [] // shells to hold the nodes
 let kingStrengths = []
 
 // shell constants
@@ -63,10 +52,7 @@ export let camera = {
 
 let maxPos = 4000
 
-export let zoomToKing = false // when new focus put camera there
-export function setZoomToKing(bool) {
-    zoomToKing = bool
-}
+let zoomToKing = false // when new focus put camera there
 
 function cyrb128(str) {
     let h1 = 1779033703, h2 = 3144134277,
@@ -114,15 +100,22 @@ function posY(y) {
     return (y - camera.y) * camera.zoom + centerY
 }
 
-export let originalIds = []
+let originalIds = []
 
-function doItBetter() {
-
+function reset() {
+    king = null
     slackIds = []
     slackConnections = []
     nodes = []
     kingCircle = []
     originalIds = []
+    kingShells = []
+    kingStrengths = []
+    masterArray = []
+    masterData = []
+}
+
+function doItBetter() {
     
     // iterate throught he data to createa a general list of slack ids to resort back to
     // then, get connections through the master array (slack ids will be aligned with the data)
@@ -165,9 +158,10 @@ function doItBetter() {
 
 
 export async function gen(mA, mD) {
-    console.log("generating visualizer")
+    //console.log("generating visualizer")
 
-    // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
+    reset()
+
     masterArray = mA
     masterData = mD
     
@@ -227,10 +221,10 @@ export function render() {
     ctx.fillStyle = "##0f172b"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-    //if (zoomToKing) {
-    //    camera.x = nodes[king].pos.x
-    //    camera.y = nodes[king].pos.y
-    //}
+    if (zoomToKing) {
+        camera.x = nodes[king].pos.x - 1100
+        camera.y = nodes[king].pos.y - 100
+    }
 
     if (king != null) {
         // display shells and bring closer to king
@@ -255,25 +249,25 @@ function surroundNodes() {
     }
 }
 
-export let circleTouching = false
-export let circleTouched = null
-
 function displayNodes() {
     taken = null
-    let circle = null
     if (king != null) {
         taken = king
     }
+
     for (let i = 0; i < nodes.length; i++) {
+        if (king != null && i !== king && !kingCircle.includes(i)) {
+            continue
+        }
         nodes[i].renderConnections()
     }
     for (let i = 0; i < nodes.length; i++) {
+        if (king != null && i !== king && !kingCircle.includes(i)) {
+            continue
+        }
         let temp = nodes[i]
         temp.display()
     }
-
-    circleTouching = circle != null
-    circleTouched = circle
 }
 
 function assembleKing() {
@@ -473,7 +467,7 @@ class Node { // id correlates to id in the list of peoples
         // Show username
         let size = this.displayName.length
         let fontSize = 60 / (1 + Math.min(Math.pow(this.displayName.length / 10, 2) / 20, 3))
-        ctx.font = camera.zoom * fontSize + "px monospace"
+        ctx.font = "bold " + camera.zoom * fontSize + "px Nebula Sans"
         ctx.fillStyle = "white"
         ctx.fillText(this.displayName, posX(this.pos.x - size * fontSize / 3), posY(this.pos.y + this.rad * 2))
     }
@@ -498,6 +492,9 @@ class Connection { // MAKE A FEATURE TO WHEN IF NOT FOCUSED AND NOT KING THEN IF
         this.strength = 8
     }
     display(color, doShadow) {
+        if (king != null && this.user1.id !== king && this.user2.id !== king) {
+            return
+        }
         //ctx.globalAlpha -= 0.1;
         if (doShadow) {
             ctx.strokeStyle = "white"

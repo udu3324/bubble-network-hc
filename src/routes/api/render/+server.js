@@ -1,7 +1,21 @@
 import { PUBLIC_BASE_URL } from '$env/static/public'
 import { camera, gen, render, setCanvas, setKing } from '$lib/server/simpleVisualizer'
 import { foobar1, foobar3 } from '$lib/supabaseClient'
-import { createCanvas, loadImage } from 'canvas'
+import { createCanvas, loadImage, registerFont } from 'canvas'
+
+import path from 'path'
+
+const fontDir = path.resolve("static/fonts")
+
+registerFont(
+    path.join(fontDir, "NebulaSans-Book.ttf"),
+    { family: "Nebula Sans", weight: "normal" }
+)
+
+registerFont(
+    path.join(fontDir, "NebulaSans-Bold.ttf"),
+    { family: "Nebula Sans", weight: "bold" }
+)
 
 const canvasWidth = 501
 const canvasHeight = 370
@@ -39,10 +53,18 @@ export async function GET({ url }) {
     //optimize masterData
     let optimizedData = []
     masterData.forEach(cache => {
-        if (bubble.id_list.includes(cache.slack_id)) {
+        if (bubble.id_list.includes(cache.slack_id) || bubble.id_list.includes(id)) {
             optimizedData.push(cache)
         }
     })
+
+    //have the focused user at the start of the array
+    const index = optimizedData.findIndex(c => c.slack_id === id)
+    
+    if (index > 0) {
+        const [item] = optimizedData.splice(index, 1)
+        optimizedData.unshift(item)
+    }
 
     //canvas
     const canvasNetwork = createCanvas(canvasWidth, canvasHeight)
@@ -51,7 +73,7 @@ export async function GET({ url }) {
     
     await gen([bubble], optimizedData)
     setKing(0)
-    camera.zoom = 0.1
+    camera.zoom = 0.12 //0.12
 
     render()
 
