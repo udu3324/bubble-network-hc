@@ -2,14 +2,19 @@ import { PUBLIC_BASE_URL } from '$env/static/public'
 import { camera, gen, render, setCanvas, setKing } from '$lib/server/simpleVisualizer'
 import { foobar1, foobar3 } from '$lib/supabaseClient'
 import { createCanvas, loadImage, registerFont } from 'canvas'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 registerFont(
-    "fonts/NebulaSans-Book.ttf", //fuck this shit
+    path.join(__dirname, "/fonts/NebulaSans-Book.ttf"), //fuck this shit
     { family: "Nebula Sans", weight: "normal" }
 )
 
 registerFont(
-    "fonts/NebulaSans-Bold.ttf",
+    path.join(__dirname, "/fonts/NebulaSans-Bold.ttf"),
     { family: "Nebula Sans", weight: "bold" }
 )
 
