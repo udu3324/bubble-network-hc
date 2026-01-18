@@ -1,4 +1,3 @@
-import { dev } from '$app/environment'
 import { PUBLIC_BASE_URL } from '$env/static/public'
 import { camera, gen, render, setCanvas, setKing } from '$lib/server/simpleVisualizer'
 import { foobar1, foobar3 } from '$lib/supabaseClient'
@@ -6,15 +5,13 @@ import { createCanvas, loadImage, registerFont } from 'canvas'
 
 import path from 'path'
 
-let append = dev ? "static/" : ""
-
 registerFont(
-    path.join(process.cwd(), append + "fonts/NebulaSans-Book.ttf"),
+    path.join(process.cwd(), "fonts/NebulaSans-Book.ttf"),
     { family: "Nebula Sans", weight: "normal" }
 )
 
 registerFont(
-    path.join(process.cwd(), append + "fonts/NebulaSans-Bold.ttf"),
+    path.join(process.cwd(), "fonts/NebulaSans-Bold.ttf"),
     { family: "Nebula Sans", weight: "bold" }
 )
 
