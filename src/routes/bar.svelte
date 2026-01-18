@@ -11,7 +11,10 @@
         masterData,
         slackConnections,
         originalIds,
-        recenter
+        recenter,
+
+        masterArray
+
     } from "$lib/visualizer"
     import SearchTab from "./SearchBar.svelte"
 
@@ -39,6 +42,22 @@
     function share() {
         if (!navigator.clipboard || !window.ClipboardItem) {
             alert("clipboard is not supported in your browser :(")
+            return
+        }
+
+        //take a shortcut to maintain consistency in shared images
+        if (masterArray.findIndex(o => o.slack_id === nodes[king].user) >= 0) {
+            fetch(`/api/render?id=${nodes[king].user}`)
+                .then(res => res.blob())
+                .then(blob => {
+                    const item = new ClipboardItem({ "image/png": blob })
+                    //console.log("writing", item)
+
+                    navigator.clipboard
+                        .write([item])
+                        .then(() => alert("Copied to clipboard!"))
+                        .catch((err) => console.error("Clipboard error:", err))
+                })
             return
         }
 

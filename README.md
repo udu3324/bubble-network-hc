@@ -8,7 +8,32 @@ Oauth access gives slack endpoints to reveal what **public** channels you are in
 
 **How is this a Good Metric**    
 
-It's not. Well, its close enough. Slack does offer scopes to reveal dmed users, group conversations, or private channels, but the bot itself has to be invited to them to see it. I do not know a workaround to this unless if everyone is willing to invite the bot to every channel or it gets admin workspace access.
+Its.... good enough. Slack does offer scopes to reveal dmed users, group conversations, or private channels, but the bot itself has to be invited to them to see it. I do not know a workaround to this unless if everyone is willing to invite the bot to their channel, or the bot recieves admin workspace access.
+
+## endpoints
+```
+
+# "id" is a query string of "?id=" at the end of a fetch url
+# requiring auth passes a slack token and id securely through the request header
+
+
+/api/render - renders a sharable image of the slack id's bubble
+
+
+# /api/slack --- ALL ARE FOR INTERNAL USE ONLY!!!
+/avatar - proxys an image to avoid cors issue
+/cache - caches a slack id
+/callback - for slack oauth
+/scan - scans a slack id 
+
+
+# /api/supabase --- Public data
+/cache - get the cache of an "id" (query string)
+/network - get the network of an "id" (query string)
+/clear - clear the network data of an "id" (requires auth)
+/ncache - bulk /api/slack/cache of a network's id_list of "id" (requires auth)
+
+```
 
 ## database 
 
