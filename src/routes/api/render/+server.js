@@ -3,18 +3,14 @@ import { camera, gen, render, setCanvas, setKing } from '$lib/server/simpleVisua
 import { foobar1, foobar3 } from '$lib/supabaseClient'
 import { createCanvas, loadImage, registerFont } from 'canvas'
 import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 registerFont(
-    path.join(__dirname, "../../../lib/fonts/NebulaSans-Book.ttf"), 
+    path.resolve('./src/lib/fonts', 'NebulaSans-Book.ttf'), 
     { family: "Nebula Sans", weight: "normal" }
 )
 
 registerFont(
-    path.join(__dirname, "../../../lib/fonts/NebulaSans-Bold.ttf"),
+    path.resolve('./src/lib/fonts', 'NebulaSans-Bold.ttf'),
     { family: "Nebula Sans", weight: "bold" }
 )
 
