@@ -9,12 +9,12 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 registerFont(
-    path.join(__dirname, "../../../lib/assets/fonts/NebulaSans-Book.ttf"), //fuck this shit
+    path.join(__dirname, "../../../lib/fonts/NebulaSans-Book.ttf"), 
     { family: "Nebula Sans", weight: "normal" }
 )
 
 registerFont(
-    path.join(__dirname, "../../../lib/assets/fonts/NebulaSans-Bold.ttf"),
+    path.join(__dirname, "../../../lib/fonts/NebulaSans-Bold.ttf"),
     { family: "Nebula Sans", weight: "bold" }
 )
 
