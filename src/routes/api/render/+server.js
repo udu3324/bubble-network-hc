@@ -3,22 +3,29 @@ import { camera, gen, render, setCanvas, setKing } from '$lib/server/simpleVisua
 import { foobar1, foobar3 } from '$lib/supabaseClient'
 import { createCanvas, loadImage, registerFont } from 'canvas'
 import path from 'path'
+import fs from 'fs'
+import os from 'os'
 
-const bookFontPath = path.resolve(process.cwd(), 'static/fonts/NebulaSans-Book.ttf')
-const boldFontPath = path.resolve(process.cwd(), 'static/fonts/NebulaSans-Bold.ttf')
+let fontsRegistered = false
 
-console.log('Registering Book font from:', bookFontPath)
-console.log('Registering Bold font from:', boldFontPath)
+async function resolveFontPath(filename) {
+    const localPath = path.resolve(process.cwd(), `static/fonts/${filename}`)
+    if (fs.existsSync(localPath)) {
+        return localPath
+    }
 
-registerFont(bookFontPath, {
-    family: 'Nebula Sans',
-    weight: 'normal',
-})
-
-registerFont(boldFontPath, {
-    family: 'Nebula Sans',
-    weight: 'bold',
-})
+    const tmpPath = path.join(os.tmpdir(), filename)
+    if (!fs.existsSync(tmpPath)) {
+        const fontUrl = `${PUBLIC_BASE_URL}/fonts/${filename}`
+        const res = await fetch(fontUrl)
+        if (!res.ok) {
+            throw new Error(`Failed to fetch font ${filename} from ${fontUrl}`)
+        }
+        const buf = Buffer.from(await res.arrayBuffer())
+        await fs.promises.writeFile(tmpPath, buf)
+    }
+    return tmpPath
+}
 
 const canvasWidth = 501
 const canvasHeight = 370
@@ -67,6 +74,24 @@ export async function GET({ url }) {
     if (index > 0) {
         const [item] = optimizedData.splice(index, 1)
         optimizedData.unshift(item)
+    }
+
+    // ensure fonts are registered (works locally and on Vercel)
+    if (!fontsRegistered) {
+        const bookPath = await resolveFontPath('NebulaSans-Book.ttf')
+        const boldPath = await resolveFontPath('NebulaSans-Bold.ttf')
+
+        registerFont(bookPath, {
+            family: 'Nebula Sans',
+            weight: 'normal',
+        })
+
+        registerFont(boldPath, {
+            family: 'Nebula Sans',
+            weight: 'bold',
+        })
+
+        fontsRegistered = true
     }
 
     //canvas
