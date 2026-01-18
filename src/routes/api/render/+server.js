@@ -4,16 +4,18 @@ import { foobar1, foobar3 } from '$lib/supabaseClient'
 import { createCanvas, loadImage, registerFont } from 'canvas'
 
 import path from 'path'
+import { fileURLToPath } from 'url'
 
-const fontDir = path.resolve("static/fonts")
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 registerFont(
-    path.join(fontDir, "NebulaSans-Book.ttf"),
+    path.join(__dirname, "fonts/NebulaSans-Book.ttf"),
     { family: "Nebula Sans", weight: "normal" }
 )
 
 registerFont(
-    path.join(fontDir, "NebulaSans-Bold.ttf"),
+    path.join(__dirname, "fonts/NebulaSans-Bold.ttf"),
     { family: "Nebula Sans", weight: "bold" }
 )
 
