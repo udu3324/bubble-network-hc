@@ -172,7 +172,11 @@ export async function GET({ url }) {
 
     const buffer = await canvasShare.toBuffer('image/png')
 
+    const filename = `${id}@bubble-network-${date.toISOString().replace(/[:.]/g, '-')}.png`
     return new Response(buffer, {
-        headers: { 'Content-Type': 'image/png' }
+        headers: { 
+            'Content-Type': 'image/png',
+            'Content-Disposition': `attachment; filename="${filename}"`
+        }
     })
 };
