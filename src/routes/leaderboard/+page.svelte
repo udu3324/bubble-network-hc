@@ -27,8 +27,10 @@
             data = await foobar3()
         }
 
-        highlited = leaderboard.findIndex(o => o.slack_id === localStorage.getItem("user_id").replaceAll("\"", ""))
-
+        if (localStorage.getItem("user_id") !== null) {
+            highlited = leaderboard.findIndex(o => o.slack_id === localStorage.getItem("user_id").replaceAll("\"", ""))
+        }
+        
         leaderboard.forEach(node => {
             totalConnectionsMade += node.id_list.length
         })
