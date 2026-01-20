@@ -15,7 +15,8 @@
 
     <div class="pb-3 font-extralight italic">
         <a href="/info">info</a> - 
-        <a href="https://github.com/udu3324/bubble-network-hc" target="_blank">source code</a>
+        <a href="/leaderboard">leaderboard</a> - 
+        <a href="https://github.com/udu3324/bubble-network-hc" target="_blank">src</a>
     </div>
 
     <OAuthButton/>
@@ -34,3 +35,11 @@
     <CachePanel/>
     
 </div>
+
+<style lang="postcss">
+    @reference "tailwindcss";
+    
+    a {
+        @apply hover:underline;
+    }
+</style>
