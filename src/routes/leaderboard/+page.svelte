@@ -1,7 +1,8 @@
 <script>
     import { goto } from "$app/navigation"
-    import { foobar1, foobar3 } from "$lib/supabaseClient";
-    import { masterArray, masterData } from "$lib/visualizer";
+    import { resolve } from "$app/paths"
+    import { foobar1, foobar3 } from "$lib/supabaseClient"
+    import { masterArray, masterData } from "$lib/visualizer"
     import { onMount } from "svelte"
 
     let leaderboard = []
@@ -39,7 +40,7 @@
     }
 
     function leave() {
-        goto("/")
+        goto(resolve("/"))
     }
 
     function getProfilePicture(slackID) {
@@ -85,7 +86,7 @@
 
         <div class="overflow-y-scroll flex-1">
             <table class="bg-slate-600 w-full">
-                <thead class="sticky top-0">
+                <thead class="sticky top-0 z-10">
                     <tr class="h-9 bg-slate-900">
                         <td class="w-10 text-center" title="number of connections">
                             <i class="fa-solid fa-circle-nodes"></i>
@@ -102,15 +103,15 @@
                 </thead>
                 <tbody>
                     {#if data.length > 0}
-                    {#each leaderboard as node, i}
-                    <tr onclick={() => goto(`/?id=${node.slack_id}`)} class="{getBackgroundColor(i)} hoverrow">
+                    {#each leaderboard as node, i (node.slack_id)}
+                    <tr onclick={() => goto(resolve(`/?id=${node.slack_id}`))} class="{getBackgroundColor(i)} hoverrow">
                         <td>
                             <div class="px-1">
                                 {node.id_list.length}
                             </div>
                         </td>
                         <td>
-                            <img loading="lazy" src={getProfilePicture(node.slack_id)}>
+                            <img loading="lazy" src={getProfilePicture(node.slack_id)} alt="pfp">
                         </td>
                         <td>
                             <div class="pl-1 pr-2">
@@ -138,6 +139,12 @@
 
     .pop {
         @apply bg-slate-800 p-3;
+    }
+
+    @media only screen and (max-width: 570px) {
+        .pop {
+            @apply text-2xl;
+        }
     }
 
     button {

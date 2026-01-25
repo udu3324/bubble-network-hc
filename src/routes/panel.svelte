@@ -8,7 +8,13 @@
     
 </script>
 
-<div class="bg-slate-700 mr-3 p-3 w-72 rounded-lg text-white overflow-y-auto">
+<div class="mobile bg-slate-700 mr-3 p-3 w-72 rounded-lg text-white overflow-y-auto overflow-x-hidden">
+    <!--
+    <button title="toggle panel" class="mobile-button relative z-50 left-full top-0 w-10 h-10 bg-slate-800 text-white">
+        <i class="fa-solid fa-arrow-left"></i>
+    </button>
+    -->
+
     <div class="">
         <span class="text-3xl font-bold">Bubble Network</span>
     </div>
@@ -41,5 +47,19 @@
     
     a {
         @apply hover:underline;
+    }
+
+    .mobile-button {
+        
+    }
+
+    @media only screen and (max-width: 915px) {
+        .mobile {
+            @apply hidden absolute z-20 shadow-xl bg-slate-700;
+        }
+
+        .mobile-button {
+            @apply visible;
+        }
     }
 </style>

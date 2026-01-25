@@ -252,6 +252,33 @@
         setMouseX(e.clientX - mOffsetX)
         setMouseY(e.clientY - mOffsetY)
     }
+
+    function touchToMouseEvent(touchEvent) {
+        const touch = touchEvent.touches[0] || touchEvent.changedTouches[0]
+        const mouseEvent = {
+            button: 0,
+            clientX: touch.clientX,
+            clientY: touch.clientY,
+            preventDefault: () => touchEvent.preventDefault(),
+            stopPropagation: () => touchEvent.stopPropagation(),
+        }
+        return mouseEvent
+    }
+
+    function touchStartHandler(e) {
+        e.preventDefault()
+        mouseDownHandler(touchToMouseEvent(e))
+    }
+
+    function touchMoveHandler(e) {
+        e.preventDefault()
+        mouseMoveHandler(touchToMouseEvent(e))
+    }
+
+    function touchEndHandler(e) {
+        e.preventDefault()
+        mouseUpHandler(touchToMouseEvent(e))
+    }
 </script>
 
 <svelte:window
@@ -277,6 +304,9 @@
     <canvas id="viewport" bind:this={canvas} width={canvasWidth} height={canvasHeight}
     on:wheel={mouseWheelHandler} on:mousedown={mouseDownHandler}
     on:mouseup={mouseUpHandler} on:mousemove={mouseMoveHandler}
+    on:touchmove={touchMoveHandler}
+    on:touchstart={touchStartHandler}
+    on:touchend={touchEndHandler}
     ></canvas>
     
     <button
