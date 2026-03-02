@@ -1,6 +1,6 @@
 import { PUBLIC_BASE_URL } from "$env/static/public"
 import { authTest, webhookLogSend, webhookStatusSend } from "$lib/server"
-import { supabase } from "$lib/server/supabaseServiceClient"
+import sql from "$lib/server/db"
 import pLimit from "p-limit"
 const limit = pLimit(5)
 
@@ -36,7 +36,7 @@ export async function GET({ request }) {
     }
 
     //fetch network data
-    const res = await fetch(`${PUBLIC_BASE_URL}/api/supabase/network?id=${id}`)
+    const res = await fetch(`${PUBLIC_BASE_URL}/api/database/network?id=${id}`)
 
     if (!res.ok) {
         webhookLogSend(`id-${id} with key-${key.sub.substring(0, 8)} tried ncache without network data`)
@@ -46,20 +46,21 @@ export async function GET({ request }) {
             }), { status: 400 })
     }
 
-    //prefetch already cached avatars //todo date overwrite
-    const data2 = await supabase
-            .from('cache')
-            .select()
-    
-    if (data2.error) {
+    //prefetch already cached avatars 
+    //todo date overwrite
+    let currentCache
+    try {
+        currentCache = await sql`
+            select * from cache
+        `
+    } catch (error) {
         webhookLogSend(`id-${id} failed ncache pre cache lookup`)
 
         return new Response(JSON.stringify({
                 error: "failed to read cache table, please report this to someone!",
+                details: error
             }), { status: 400 })
     }
-
-    const currentCache = data2.data
 
     const data = await res.json()
 
@@ -107,7 +108,7 @@ export async function GET({ request }) {
         webhookLogSend(`id-${id} tried ncache and failed conversations.history\n${err.message}`)
         
         return new Response(JSON.stringify({
-            error: "something bad happened... slack api conversations.history failed with an error, please report this to someone!",
+            error: "something bad happened... slack api ncache conversations.history failed with an error, please report this to someone!",
             details: err.message
         }), { status: 400 })
     }

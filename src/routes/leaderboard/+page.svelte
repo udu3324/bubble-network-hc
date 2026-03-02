@@ -1,7 +1,7 @@
 <script>
     import { goto } from "$app/navigation"
     import { resolve } from "$app/paths"
-    import { foobar1, foobar3 } from "$lib/supabaseClient"
+    import { getFullCacheData, getFullNetworkData } from "$lib"
     import { masterArray, masterData } from "$lib/visualizer"
     import { onMount } from "svelte"
 
@@ -24,8 +24,8 @@
             leaderboard = masterArray
             data = masterData
         } else {
-            leaderboard = await foobar1()
-            data = await foobar3()
+            leaderboard = await getFullNetworkData()
+            data = await getFullCacheData()
         }
 
         if (localStorage.getItem("user_id") !== null) {

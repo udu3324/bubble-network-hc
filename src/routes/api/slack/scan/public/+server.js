@@ -1,5 +1,5 @@
 import { authTest, webhookLogSend } from "$lib/server"
-import { supabase } from "$lib/server/supabaseServiceClient"
+import sql from "$lib/server/db"
 import { WebClient } from "@slack/web-api"
 import { json } from "@sveltejs/kit"
 import pLimit from "p-limit"
@@ -81,7 +81,7 @@ export async function GET({ request }) {
         webhookLogSend(`id-${id} failed slack api users.conversations.history\n${err}\n${err.message}`)
 
         return new Response(JSON.stringify({
-            error: "something bad happened... slack api conversations.history failed with an error, please report this to someone!",
+            error: "something bad happened... slack api scan public conversations.history failed with an error, please report this to someone!",
             details: err.message
         }), { status: 400 })
     }
@@ -114,18 +114,22 @@ export async function GET({ request }) {
         }
     }
 
+    //remove undefined ids that somehow ended up in the array???
+    const cleaned = Array.from(user_ids).filter(v => typeof v === 'string')
+    
     //store in db
-    const { error } = await supabase
-        .from('network')
-        .upsert({
-            modified_at: new Date().toISOString(),
-            slack_id: id,
-            id_list: [...user_ids]
-        }, {
-            onConflict: 'slack_id'
-        })
-
-    if (error) {
+    try {
+        await sql`
+            insert into network
+                (modified_at, slack_id, id_list)
+            values
+                (${new Date()}, ${id}, ${cleaned})        
+            on conflict (slack_id)
+            do update set
+                modified_at = EXCLUDED.modified_at,
+                id_list = EXCLUDED.id_list
+        `
+    } catch (error) {
         webhookLogSend(`id-${id} failed db upsert\n${error}`)
 
         return new Response(JSON.stringify({

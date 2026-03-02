@@ -52,7 +52,7 @@
                 if (hasData) return
 
                 //check if their id is stored in the network
-                const res = await fetch(`/api/supabase/network?id=${id}`)
+                const res = await fetch(`/api/database/network?id=${id}`)
 
                 if (res.ok) {
                     hasData.set(true)

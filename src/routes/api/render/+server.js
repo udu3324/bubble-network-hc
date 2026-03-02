@@ -1,10 +1,11 @@
 import { PUBLIC_BASE_URL } from '$env/static/public'
 import { camera, gen, render, setCanvas, setKing } from '$lib/server/simpleVisualizer'
-import { foobar1, foobar3 } from '$lib/supabaseClient'
+import { foobar1, foobar3 } from '$lib/databaseFetch'
 import { createCanvas, loadImage, registerFont } from 'canvas'
 import path from 'path'
 import fs from 'fs'
 import os from 'os'
+import sql from '$lib/server/db'
 
 let fontsRegistered = false
 
@@ -37,7 +38,9 @@ export async function GET({ url }) {
     if (!id)
         return new Response('Missing id', { status: 400 })
 
-    const masterArray = await foobar1()
+    const masterArray = await sql`
+        select * from network
+    `
 
     const bubble = masterArray.find(u => u.slack_id === id)
 
@@ -47,9 +50,11 @@ export async function GET({ url }) {
         }), { status: 400 })
     }
 
-    const masterData = await foobar3()
+    const masterData = await sql`
+        select * from cache
+    `
 
-    const res = await fetch(`${PUBLIC_BASE_URL}/api/supabase/cache?id=${id}`)
+    const res = await fetch(`${PUBLIC_BASE_URL}/api/database/cache?id=${id}`)
 
     if (!res.ok) {
         return new Response(JSON.stringify({

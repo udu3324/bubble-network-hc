@@ -21,7 +21,8 @@
         "svelte all day any day",
         "#bubble on slack for the official channel",
         "how do i make a privacy policy",
-        "so, hows your day"
+        "so, hows your day",
+        "i love pgadmin 4"
     ]
     let fun_msg_index = 0
 
@@ -91,7 +92,7 @@
     }
 
     async function clear() {
-        const res = await fetch('/api/supabase/clear', {
+        const res = await fetch('/api/database/clear', {
             method: "GET",
             headers: {
                 "authorization": `Bearer ${localStorage.getItem("token").replaceAll("\"", "")}`,
@@ -127,7 +128,7 @@
         
         try {
             //check if their id is stored in the network
-            const res = await fetch(`/api/supabase/network?id=${localStorage.getItem("user_id").replaceAll("\"", "")}`)
+            const res = await fetch(`/api/database/network?id=${localStorage.getItem("user_id").replaceAll("\"", "")}`)
 
             if (res.ok) {
                 hasData.set(true)

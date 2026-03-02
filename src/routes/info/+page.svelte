@@ -27,7 +27,7 @@
             <span><b>tldr;</b> the information we access and need can be found without a oauth key. (anyone can request it as its public information)</span>
             
             <h1>Source Code</h1>
-            <span>Made with svelte, tailwind, and fontawesome. Vercel and supabase are also used.</span>
+            <span>Made with svelte, tailwind, and fontawesome. Hosted on vercel and postgresql are also used.</span>
             
             <br><br>
 

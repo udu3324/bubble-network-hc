@@ -1,5 +1,5 @@
 import { authTest, webhookLogSend } from "$lib/server"
-import { supabase } from "$lib/server/supabaseServiceClient"
+import sql from "$lib/server/db"
 import { WebClient } from "@slack/web-api"
 import { json } from "@sveltejs/kit"
 
@@ -33,25 +33,27 @@ export async function GET({ request }) {
             }), { status: 401 })
     }
 
-    const res = await supabase
-        .from('network')
-        .delete()
-        .eq('slack_id', id)
-        .select()
-
-    if (res.error) {
-        webhookLogSend(`id-${id} failed to clear network db row\n${res}\n${res.status}\n${res.statusText}`)
+    let data
+    try {
+        data = await sql`
+            delete from network
+            where
+                slack_id = ${id}
+            returning *
+        `
+    } catch (error) {
+        webhookLogSend(`id-${id} failed to clear network db row\n${error}`)
         
         return new Response(JSON.stringify({
             error: "something bad has happened... db network delete has failed, please report this to someone!",
-            details: `${res} ${res.status} ${res.statusText}`
+            details: error
         }), { status: 500 })
     }
 
-    if (res.data.lenth === 0) {
+    if (data.length === 0) {
         return new Response(JSON.stringify({
             details: "no data found",
-        }), { status: 204 })
+        }), { status: 401 })
     }
 
     return new Response(JSON.stringify({

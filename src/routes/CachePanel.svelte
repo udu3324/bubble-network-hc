@@ -29,7 +29,7 @@
 			elapsed += 1
 		}, 1000)
 
-        const res = await fetch('/api/supabase/ncache', {
+        const res = await fetch('/api/database/ncache', {
             method: "GET",
             headers: {
                 "authorization": `Bearer ${localStorage.getItem("token").replaceAll("\"", "")}`,

@@ -1,8 +1,5 @@
 import { PUBLIC_BASE_URL } from "$env/static/public"
 import { inOrg, webhookLogSend } from "$lib/server"
-import { supabase } from "$lib/server/supabaseServiceClient"
-import { WebClient } from "@slack/web-api"
-import { json } from "@sveltejs/kit"
 
 export async function GET({ url }) {
 
@@ -55,7 +52,7 @@ export async function GET({ url }) {
         }), { status: 400 })
     }
 
-    // save user id, display name, and pfp url to supabase
+    // save user id, display name, and pfp url to database
     
     const userInfo = data.authed_user
 

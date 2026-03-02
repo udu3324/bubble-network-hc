@@ -1,6 +1,5 @@
 import { writable } from "svelte/store"
-import { foobar1, foobar3 } from "./supabaseClient"
-import { modifyURLParams } from "$lib"
+import { getFullCacheData, getFullNetworkData, modifyURLParams } from "$lib"
 
 export let visibility = 50 //100 - all, 0 - none
 export let renderConnectionsOutsideCanvas = false
@@ -259,9 +258,9 @@ export async function gen() {
     console.log("generating visualizer")
 
     // IF ON WEBSITE MODE, TAKE DATA FROM THE SERVER
-    masterArray = await foobar1()
+    masterArray = await getFullNetworkData()
     //alert(masterArray)
-    masterData = await foobar3()
+    masterData = await getFullCacheData()
     //alert(masterData.length)
 
     //compileData();

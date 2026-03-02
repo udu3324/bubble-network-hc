@@ -25,3 +25,25 @@ export function modifyURLParams(id) {
         replaceState(resolve(url.pathname + url.search), page.state)
     }
 }
+
+export async function getFullNetworkData() {
+    const data = await fetch("/api/database/network/full")
+    .then(response => response.json())
+    .then((res) => {
+        return res
+    })
+    
+    return data.sort((a, b) => 
+        b.id_list.length - a.id_list.length
+    )
+}
+
+export async function getFullCacheData() {
+    const data = await fetch("/api/slack/cache/full")
+    .then(response => response.json())
+    .then((res) => {
+        return res
+    })
+    
+    return data
+}

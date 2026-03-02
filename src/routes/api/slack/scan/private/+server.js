@@ -1,4 +1,4 @@
-import { supabase } from "$lib/server/supabaseServiceClient"
+import sql from "$lib/server/db"
 import { WebClient } from "@slack/web-api"
 import { json } from "@sveltejs/kit"
 

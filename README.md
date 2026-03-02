@@ -27,7 +27,7 @@ Its.... good enough. Slack does offer scopes to reveal dmed users, group convers
 /scan - scans a slack id 
 
 
-# /api/supabase --- Public data
+# /api/database --- Public data
 /cache - get the cache of an "id" (query string)
 /network - get the network of an "id" (query string)
 /clear - clear the network data of an "id" (requires auth)
@@ -37,7 +37,7 @@ Its.... good enough. Slack does offer scopes to reveal dmed users, group convers
 
 ## database 
 
-I use supabase but any could work. Two tables are needed to store data, one for slack profile data and another for network data.
+I use postgresql. Two tables are needed to store data, one for slack profile data and another for network data.
 
 **cache table**
 ```sql
@@ -93,9 +93,6 @@ SLACK_BOT_OAUTH_TOKEN=
 PUBLIC_BASE_URL=
 PUBLIC_SLACK_APP_CLIENT_ID=
 
-PUBLIC_SUPABASE_URL=
-PUBLIC_SUPABASE_ANON_KEY=
-
-SUPABASE_SERVICE_ROLE_KEY=
+DATABASE_URL=
 
 ```
