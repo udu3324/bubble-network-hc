@@ -1,6 +1,5 @@
 import { PUBLIC_BASE_URL } from '$env/static/public'
 import { camera, gen, render, setCanvas, setKing } from '$lib/server/simpleVisualizer'
-import { foobar1, foobar3 } from '$lib/databaseFetch'
 import { createCanvas, loadImage, registerFont } from 'canvas'
 import path from 'path'
 import fs from 'fs'
