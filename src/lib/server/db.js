@@ -12,7 +12,8 @@ const sql =
             ? { rejectUnauthorized: false }
             : false,
         max: 5,
-        idle_timeout: 20
+        idle_timeout: 20,
+        connect_timeout: 10
     })
 
 export default sql
